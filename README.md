@@ -22,4 +22,7 @@ To setup:
 
 1) I recommend setting up a venv like so: python3 -m venv venv
 2) Activate the venv: source venv/bin/activate
-3) pip install -r requirements.txt
+3) run: git clone git@github.com:JunnanShimizu/SmartMaps.git
+4) cd SmartMaps
+5) pip install -r requirements.txt
+6) To run: python3 app.py
