@@ -1,0 +1,3 @@
+[run]
+omit =
+    website/__init__.py
