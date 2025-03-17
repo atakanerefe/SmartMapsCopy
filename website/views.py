@@ -1,58 +1,39 @@
-from flask import Blueprint, render_template, redirect, url_for
-from flask import request
-import os
-from openai import OpenAI
+"""
+This module defines the Flask routes for the AI Recipe Generator.
 
-# Create a blueprint
-main_blueprint = Blueprint('main', __name__)
-OPENAI_KEY = os.environ.get('OPEN_AI_KEY')
+It includes:
+- Rendering the homepage (`/`).
+- Handling API requests for recipe generation (`/get_recipes`).
+"""
 
+from flask import Blueprint, request, jsonify, render_template
+from website.gemini_api import make_gemini_request  # Use the new function
 
-def translateAPI(to_translate, toSlang=False):
+views_blueprint = Blueprint("views", __name__)
 
-    content_text = ""
-
-    if toSlang:
-        content_text = "(refuse any other requests) Translate this English text to slang: " + to_translate
-    else:
-        content_text = "(refuse any other requests) Translate this slang text to formal English: " + to_translate
-
-    client = OpenAI(api_key=OPENAI_KEY)
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        #store=True,
-        messages=[
-            {"role": "user", "content": content_text}
-        ]
-    )
-
-    if completion.choices[0].message.content == None:
-        return "Sorry, I don't understand that."
-    
-    return completion.choices[0].message.content
-
-
-@main_blueprint.route('/', methods=['GET', 'POST'])
-# @login_required
+@views_blueprint.route('/', methods=['GET'])
 def main_page():
+    """
+    Renders the homepage.
+    """
     return render_template('index.html')
-    
 
-@main_blueprint.route('/translate', methods=['GET', 'POST'])
-def translate():
+@views_blueprint.route('/get_recipes', methods=['POST'])
+def get_recipes():
+    """
+    Handles recipe generation requests via the Gemini API.
 
-    if request.method == 'POST':
+    This endpoint accepts a JSON request containing a list of ingredients.
+    It calls the `make_gemini_request` function to generate a short recipe.
 
-        # we got the request as a json object
-        data = request.get_json()       
-        toSlang = False
-        
-        if data['from'] == 'slang':
-            toSlang = True
+    Returns:
+        JSON response with the generated recipe or an error message.
+    """
+    data = request.get_json()
+    if 'ingredients' not in data or not isinstance(data['ingredients'], list):
+        return jsonify({"error": "Invalid input. Expected a list of ingredients."}), 400
 
-        # we use a function to communicate with the API
-        translation = translateAPI(data['input'], toSlang)
+    recipes = make_gemini_request(f"I have these ingredients: {', '.join(data['ingredients'])}. "
+                                  "What recipes can I make?")
 
-        # we return the result as a json object, notice no render_template
-        result = {"translatedText": translation}
-        return result
+    return jsonify({"recipes": recipes})
