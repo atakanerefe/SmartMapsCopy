@@ -14,7 +14,7 @@ def create_app():
     Returns:
         Flask app instance.
     """
-    app = Flask(__name__, template_folder="../templates")
+    app = Flask(__name__)
 
     # Register blueprints with unique names
     app.register_blueprint(views_blueprint)
