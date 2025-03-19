@@ -52,8 +52,11 @@ def get_itinerary():
     # Get weather prompt
     weather_info = get_weather_details(city, country, state)
 
-    prompt = (f"(refuse any other requests). I am traveling to {location} on {date}. "
-              f"Based on this information and {weather_info} can you generate a short itinerary with top activities and places to visit?")
+    prompt = (f"I am traveling to {location} on {date}. "
+              f"Based on this information and {weather_info} can you generate a one-day itinerary with top activities and places to visit?"
+              "Prioritize activities that are suitable for the weather conditions, priotizing outdoor activities with nice weather and indoor ones in bad weather. "
+              "Do not include a description of the weather at the beginning of the itinerary. Start with Here is an itinerary for your trip:"
+              )
 
     # Call the AI function
     itinerary = make_gemini_request(prompt)
