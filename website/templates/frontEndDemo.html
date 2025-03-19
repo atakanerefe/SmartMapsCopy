@@ -28,7 +28,7 @@
                 <div class="modal-body">
                     <form id="locationForm">
                         <div class="mb-3">
-                            <label for="locationName" class="form-label">Location Name</label>
+                            <label for="locationName" class="form-label">Location Name (City, State(optional), Country)</label>
                             <input type="text" class="form-control" id="locationName" placeholder="Enter location">
                         </div>
                         <div class="mb-3">
@@ -45,15 +45,15 @@
     <!-- Previously Added Locations -->
     <div class="card">
         <div class="card-header">
-            <h5>Previously Added Locations</h5>
+            <h5>Itinerary</h5>
         </div>
         <ul class="list-group list-group-flush" id="locationList">
             <!-- Sample locations -->
             <li class="list-group-item">
-                <a href="#" class="view-location" data-location="New York" data-date="2025-05-10 14:30">New York - May 10, 2025</a>
+                <a href="#" class="view-location" data-location="New York, NY, US" data-date="2025-05-10 14:30">New York, NY, US - May 10, 2025</a>
             </li>
             <li class="list-group-item">
-                <a href="#" class="view-location" data-location="Tokyo" data-date="2025-06-15 09:00">Tokyo - June 15, 2025</a>
+                <a href="#" class="view-location" data-location="Tokyo, Japan" data-date="2025-06-15 09:00">Tokyo, Japan - June 15, 2025</a>
             </li>
         </ul>
     </div>
@@ -63,6 +63,9 @@
         <h4>Selected Location</h4>
         <p><strong>Location:</strong> <span id="selectedLocation">None</span></p>
         <p><strong>Date & Time:</strong> <span id="selectedDate">N/A</span></p>
+    </div>
+    <div class="border p-3 bg-white" id="itineraryOutput" style="min-height: 100px;">
+        Enter your trip information above for a curated list of activities for your next vacation!
     </div>
 </div>
 
@@ -106,9 +109,43 @@
                 event.preventDefault();
                 selectedLocation.textContent = event.target.getAttribute("data-location");
                 selectedDate.textContent = event.target.getAttribute("data-date");
+                generateItinerary(selectedLocation.textContent, selectedDate.textContent);
             }
         });
     });
+</script>
+
+<script>
+    function generateItinerary(location_name, location_time) {
+        let name = location_name;
+        let time = location_time;
+        let output = document.getElementById("itineraryOutput");
+
+        if (!name.trim() || !time.trim()) {
+            output.innerText = "Invalid Information. Please enter details about your trip.";
+            return;
+        }
+
+        // Send the entire input as a single text block
+        fetch("/get_itinerary", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: location_name,  // Send input as a raw text string
+                time: location_time
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Parse Markdown and render it as HTML
+            output.innerText = data.itinerary;
+        })
+        .catch(error => {
+            output.innerText = "An error occurred. Please try again.";
+        });
+    }
 </script>
 
 </body>
