@@ -22,7 +22,7 @@ def test_get_itinerary_missing_name(gemini_api_mock):
 
 def test_get_itinerary_invalid_name(gemini_api_mock):
     """
-    Test when 'name' is missing from the POST body
+    Test when 'name' is in wrong form
     """
     response = gemini_api_mock.post("/get_itinerary", json={"name":"Waterville, ME, US, 04901", 
                                                             "time": "2025-05-10"})
