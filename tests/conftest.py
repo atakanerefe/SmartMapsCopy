@@ -23,7 +23,7 @@ def gemini_api_mock(mocker):
     flask_app = create_app()
 
     # Mocking getRecipesAPI to return a static response instead of calling Gemini
-    mocker.patch('website.views.get_recipes', return_value="Make a grilled cheese! Butter bread, add cheese, and grill.")
+    mocker.patch('website.views.get_itinerary', return_value="1. Breakfast at local café\n2. Hike at Blue Mountain\n3. Wine tasting in the afternoon")
 
     with flask_app.test_client() as testing_client:
         yield testing_client

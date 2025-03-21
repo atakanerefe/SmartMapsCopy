@@ -11,12 +11,12 @@ def test_make_gemini_request_success(mock_post):
     mock_post.return_value.status_code = 200
     mock_post.return_value.json.return_value = {
         "candidates": [
-            {"content": {"parts": [{"text": "Try making pasta!"}]}}
+            {"content": {"parts": [{"text": "Step 1: Gather materials\nStep 2: Start working"}]}}
         ]
     }
 
-    result = make_gemini_request("What can I cook?")
-    assert result == "Try making pasta!"
+    result = make_gemini_request("Break down this task")
+    assert result == "Step 1: Gather materials\nStep 2: Start working"
 
 @patch("requests.post")
 def test_make_gemini_request_error(mock_post):
@@ -25,7 +25,7 @@ def test_make_gemini_request_error(mock_post):
     """
     mock_post.return_value.status_code = 500
 
-    result = make_gemini_request("What can I cook?")
+    result = make_gemini_request("Break down this task")
     assert "Error: Request failed with status 500" in result
 
 @patch("requests.post")
@@ -39,7 +39,7 @@ def test_make_gemini_request_missing_keys(mock_post):
         "unexpected_key": "No valid response"
     }
 
-    result = make_gemini_request("What can I cook?")
+    result = make_gemini_request("Break down this task")
     assert result == "Sorry, I couldn't generate a response."
 
 @patch("requests.post")
@@ -52,5 +52,5 @@ def test_make_gemini_request_index_error(mock_post):
         "candidates": []  # Empty list triggers IndexError
     }
 
-    result = make_gemini_request("What can I cook?")
+    result = make_gemini_request("Break down this task")
     assert result == "Sorry, I couldn't generate a response."
