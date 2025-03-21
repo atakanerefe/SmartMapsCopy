@@ -20,6 +20,25 @@ def test_get_itinerary_missing_name(gemini_api_mock):
     assert response.status_code == 400
     assert response.get_json() == {"error": "Invalid input. Expected location name as a text string."}
 
+def test_get_itinerary_invalid_name(gemini_api_mock):
+    """
+    Test when 'name' is missing from the POST body
+    """
+    response = gemini_api_mock.post("/get_itinerary", json={"name":"Waterville, ME, US, 04901", 
+                                                            "time": "2025-05-10"})
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid input. Expected location in the format 'city, state, country'."}
+
+def test_get_itinerary_with_state(gemini_api_mock):
+    """
+    Test when 'state' is present in the POST body
+    """
+    response = gemini_api_mock.post("/get_itinerary", json={"name":"Waterville, ME, US", 
+                                                            "time": "2025-05-10"})
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "itinerary" in data
+    assert data["itinerary"].startswith("Here is an itinerary for your trip:")
 
 def test_get_itinerary_missing_time(gemini_api_mock):
     """

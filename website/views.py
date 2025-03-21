@@ -32,7 +32,6 @@ def get_itinerary():
     if 'time' not in data or not isinstance(data['time'], str):
         return jsonify({"error": "Invalid input. Expected time as a text string."}), 400
 
-    print(data['name'])
     name_data = data['name'].split(',')
     city = name_data[0].strip()
 
@@ -45,7 +44,7 @@ def get_itinerary():
         country = name_data[2].strip()
         location = f"{city}, {state}, {country}"
     else:
-        return {"error": "Invalid input. Expected location in the format 'city, state, country'."}
+        return jsonify({"error": "Invalid input. Expected location in the format 'city, state, country'."}), 400
 
     date = data['time']
 
@@ -100,9 +99,5 @@ def get_weather(city, country, state=None, test=False):
     # way to test with assuming correct api
     if test:
         status_code = 400
-
-    if status_code != 200:
-        weather_data = None
-        error_message = "Unable to fetch weather data. Please check your inputs."
 
     return weather_data, error_message
