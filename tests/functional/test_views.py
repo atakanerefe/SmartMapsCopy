@@ -30,7 +30,7 @@ def test_get_itinerary_invalid_name(gemini_api_mock):
     assert response.get_json() == {"error": "Invalid input. Expected location in the format 'city, state, country'."}
 
 @patch("website.views.make_gemini_request", return_value="Here is an itinerary for your trip:\n1. Eiffel Tower at 9 AM\n2. Louvre Museum at 11 AM\n3. Seine River cruise at 2 PM")
-def test_get_itinerary_with_state(gemini_api_mock):
+def test_get_itinerary_with_state(mock_gemini, gemini_api_mock):
     """
     Test when 'state' is present in the POST body
     """
