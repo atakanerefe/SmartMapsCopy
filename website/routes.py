@@ -30,3 +30,7 @@ def generate():
 
     response = make_gemini_request(prompt)
     return jsonify({"response": response})
+
+@routes_blueprint.route('/demo')
+def frontend_demo():
+    return render_template('frontEndDemo.html')
