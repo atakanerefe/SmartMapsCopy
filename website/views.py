@@ -198,3 +198,7 @@ def get_weather(city, country, state=None, test=False):
 @views_blueprint.route('/demo')
 def frontend_demo():
     return render_template('frontEndDemo.html')
+
+@views_blueprint.route('/landing')
+def landing_page():
+    return render_template('landing-page.html')
