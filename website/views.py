@@ -19,7 +19,8 @@ def main_page():
     """
     Renders the homepage.
     """
-    return render_template('frontEndDemo.html')
+    # return render_template('frontEndDemo.html')
+    return render_template('index.html')
 
 @views_blueprint.route('/get_itinerary', methods=['POST'])
 def get_itinerary():
@@ -193,3 +194,11 @@ def get_weather(city, country, state=None, test=False):
         error_message = "Unable to fetch weather data. Please check your inputs."
 
     return weather_data, error_message
+
+@views_blueprint.route('/demo')
+def frontend_demo():
+    return render_template('frontEndDemo.html')
+
+@views_blueprint.route('/landing')
+def landing_page():
+    return render_template('landing-page.html')

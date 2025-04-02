@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMaps</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Markdown Parser -->
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4); /* Change as needed */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow p-4">
+            <h2 class="text-center mb-4">SmartMaps</h2>
+            <p class="text-center">Input the information of your next trip, and we will curate a list of fun things to do:</p>
+            
+            <div class="mb-3">
+                <textarea class="form-control" id="infoInput" rows="4" 
+                    placeholder="Put your information here about your next trip."></textarea>
+            </div>
+
+            <div class="d-grid gap-2 mb-3">
+                <button class="btn btn-primary" onclick="generateItinerary()">Generate</button>
+            </div>
+
+            <div class="border p-3 bg-white" id="itineraryOutput" style="min-height: 100px;">
+                Enter your trip information above for a curated list of activities for your next vacation!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateItinerary() {
+            let input = document.getElementById("infoInput").value;
+            let output = document.getElementById("itineraryOutput");
+
+            if (input.trim() === "") {
+                output.innerText = "Invalid Information. Please enter details about your trip.";
+                return;
+            }
+
+            // Send the entire input as a single text block
+            fetch("/get_itinerary", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    travel_details: input  // Send input as a raw text string
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Parse Markdown and render it as HTML
+                output.innerHTML = marked.parse(data.itinerary || "No itinerary found.");
+            })
+            .catch(error => {
+                output.innerText = "An error occurred. Please try again.";
+            });
+        }
+    </script>
+</body>
+</html>
