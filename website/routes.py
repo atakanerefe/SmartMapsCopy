@@ -2,26 +2,20 @@
 This module defines the Flask routes for handling text generation requests via the Gemini API.
 
 Routes:
-- `/generate` (POST): Accepts user input and returns 
+- `/generate` (POST): Accepts user input and returns
 AI-generated text using `make_gemini_request()`.
 """
 
+import re
 from flask import Blueprint, request, jsonify
 from website.gemini_api import make_gemini_request
+import json
 
 routes_blueprint = Blueprint("routes", __name__)
 
+
 @routes_blueprint.route('/generate', methods=['POST'])
 def generate():
-    """
-    Handles POST requests to generate text using the Gemini API.
-
-    This endpoint receives a JSON request containing an input prompt.
-    It calls `make_gemini_request` to generate a response.
-
-    Returns:
-        JSON response with the generated text or an error message.
-    """
     data = request.get_json()
     prompt = data.get("input", "")
 

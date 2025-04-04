@@ -41,9 +41,17 @@
 					<div class="trip-summary">
 						<h2>Plan Your Trip!</h2>
 						<div class="trip-summary-grid">
-							<div class="trip-item"><strong>📍 Location</strong><span>City, State, Country</span></div>
-							<div class="trip-item"><strong>📅 Date</strong><span>March 18, 2025</span></div>
-							<div class="trip-item"><strong>🕒 Travel Window</strong><span>10:00 AM – 8:00 PM</span>
+							<div class="trip-item">
+								<strong>📍 Location</strong>
+								<span id="summary-location">City, State, Country</span>
+							</div>
+							<div class="trip-item">
+								<strong>📅 Date</strong>
+								<span id="summary-date">March 18, 2025</span>
+							</div>
+							<div class="trip-item">
+								<strong>🕒 Travel Window</strong>
+								<span id="summary-time">10:00 AM – 8:00 PM</span>
 							</div>
 						</div>
 
@@ -382,6 +390,8 @@
 					<ul id="suggestions" class="autocomplete-list"></ul>
 				</div>
 
+				<div class="error-message" id="error-step-2"></div>
+
 				<div class="survey-nav">
 					<button class="prev-btn">←</button>
 					<button class="next-btn">→</button>
@@ -389,21 +399,20 @@
 			</div>
 
 			<div class="survey-step" data-step="3">
-				<h2>When are you traveling?</h2>
+				<h2>When days are you traveling?</h2>
 				<div class="date-range-inputs">
-					<label>Start Date:
+					<label>
+						Start Date:
 						<input type="date" id="start-date">
 					</label>
-					<label>Start Time:
-						<input type="time" id="start-time">
-					</label>
-					<label>End Date:
+					<label>
+						End Date:
 						<input type="date" id="end-date">
 					</label>
-					<label>End Time:
-						<input type="time" id="end-time">
-					</label>
 				</div>
+
+				<div class="error-message" id="error-step-3"></div>
+
 				<div class="survey-nav">
 					<button class="prev-btn">←</button>
 					<button class="next-btn">→</button>
@@ -411,12 +420,20 @@
 			</div>
 
 			<div class="survey-step" data-step="4">
-				<h2>What type of activities are you looking to do?</h2>
-				<div class="environment-options">
-					<button class="choice-btn" data-env="Outdoor">Outdoor</button>
-					<button class="choice-btn" data-env="Indoor">Indoor</button>
-					<button class="choice-btn" data-env="Mixed">Mixed</button>
+				<h2>Do you happen to know when you will arrive and depart?</h2>
+				<div class="date-range-inputs">
+					<label>
+						Start Time:
+						<input type="time" id="start-time">
+					</label>
+					<label>
+						End Time:
+						<input type="time" id="end-time">
+					</label>
 				</div>
+
+				<div class="error-message" id="error-step-4"></div>
+
 				<div class="survey-nav">
 					<button class="prev-btn">←</button>
 					<button class="next-btn">→</button>
@@ -424,6 +441,20 @@
 			</div>
 
 			<div class="survey-step" data-step="5">
+				<h2>What type of activities are you looking to do?</h2>
+				<div class="environment-options">
+					<button class="choice-btn" data-env="Outdoor">Outdoor</button>
+					<button class="choice-btn" data-env="Indoor">Indoor</button>
+					<button class="choice-btn" data-env="Mixed">Mixed</button>
+				</div>
+
+				<div class="survey-nav">
+					<button class="prev-btn">←</button>
+					<button class="next-btn">→</button>
+				</div>
+			</div>
+
+			<div class="survey-step" data-step="6">
 				<h2>What's your budget for this trip?</h2>
 				<div class="budget-options">
 					<button class="choice-btn" data-budget="$">$ (Budget-Friendly)</button>
@@ -437,7 +468,7 @@
 				</div>
 			</div>
 
-			<div class="survey-step" data-step="6">
+			<div class="survey-step" data-step="7">
 				<h2>What kind of experience are you looking for?</h2>
 				<div class="choice-options">
 					<button class="choice-btn" data-choice="Touristy">Touristy</button>
@@ -450,7 +481,7 @@
 				</div>
 			</div>
 
-			<div class="survey-step" data-step="7">
+			<div class="survey-step" data-step="8">
 				<h2>Do you have any dietary restrictions?</h2>
 				<div class="choice-options">
 					<button class="choice-btn" data-diet="None">No Restrictions</button>
@@ -467,7 +498,7 @@
 				</div>
 			</div>
 
-			<div class="survey-step" data-step="8">
+			<div class="survey-step" data-step="9">
 				<h2>Last thing, is there anything else we should know?</h2>
 				<div class="notes-container">
 					<textarea id="user-notes"
@@ -489,10 +520,11 @@
 	<script src="static/js/util.js"></script>
 	<script src="static/js/main.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+	<script src="static/js/survey.js"></script>
 
 	<script>
 		document.addEventListener('DOMContentLoaded', () => {
-			// --- Initialize Choices.js on multi-selects ---
+			// --- Initialize Choices.js ---
 			new Choices('#activity-select', {
 				removeItemButton: true,
 				placeholderValue: 'Activity Types',
@@ -508,13 +540,12 @@
 				placeholderValue: 'Budgets',
 			});
 
-			// --- Handle bubble tag selection ---
+			// --- Handle Recommendation Bubble Tags ---
 			const selectedTags = document.getElementById('selected-tags');
 			const bubbleGrid = document.getElementById('bubble-grid');
 
 			const addTagToSelected = (tagText, bubble) => {
-				const existingTag = [...selectedTags.children].find(t => t.dataset.tag === tagText);
-				if (existingTag) return;
+				if ([...selectedTags.children].some(t => t.dataset.tag === tagText)) return;
 
 				const tag = document.createElement('span');
 				tag.classList.add('tag');
@@ -538,18 +569,17 @@
 				}
 			};
 
-			bubbleGrid.querySelectorAll('.bubble').forEach(bubble => {
+			bubbleGrid?.querySelectorAll('.bubble').forEach(bubble => {
 				bubble.addEventListener('click', () => toggleBubble(bubble));
 			});
 
-			// --- Add custom tag ---
+			// --- Add Custom Tags ---
 			const customInput = document.getElementById('custom-tag');
 			const addButton = document.getElementById('add-custom-tag');
 
 			const createCustomBubble = (tagText) => {
 				if (!tagText) return;
 
-				// Prevent duplicates
 				const exists = [...document.querySelectorAll('.bubble')].some(
 					b => b.dataset.tag.toLowerCase() === tagText.toLowerCase()
 				);
@@ -560,12 +590,12 @@
 				bubble.dataset.tag = tagText;
 				bubble.textContent = tagText;
 				bubble.addEventListener('click', () => toggleBubble(bubble));
-				bubbleGrid.appendChild(bubble);
+				bubbleGrid?.appendChild(bubble);
 
 				addTagToSelected(tagText, bubble);
 			};
 
-			customInput.addEventListener('keydown', (e) => {
+			customInput?.addEventListener('keydown', (e) => {
 				if (e.key === 'Enter') {
 					e.preventDefault();
 					createCustomBubble(customInput.value.trim());
@@ -573,123 +603,28 @@
 				}
 			});
 
-			addButton.addEventListener('click', () => {
+			addButton?.addEventListener('click', () => {
 				createCustomBubble(customInput.value.trim());
 				customInput.value = '';
 			});
-
-			// --- Multi-step Survey Logic ---
-			const modal = document.getElementById('survey-modal');
-			const steps = document.querySelectorAll('.survey-step');
-			const nextBtns = document.querySelectorAll('.next-btn');
-			const choiceBtns = document.querySelectorAll('.choice-btn');
-			const submitBtn = document.querySelector('.submit-btn');
-
-			const responses = {};
-			let currentStep = 0;
-
-			modal.style.display = 'flex'; // Show on load
-
-			const showStep = (index) => {
-				steps.forEach((step, i) => step.classList.toggle('active', i === index));
-				currentStep = index;
-			};
-
-			nextBtns.forEach(btn => {
-				btn.addEventListener('click', () => {
-					// Run any validations based on the current step
-					if (currentStep === 1) {
-						const destination = document.getElementById('step-destination').value.trim();
-						if (!destination) return alert("Please enter a destination");
-						responses.destination = destination;
-					} else if (currentStep === 2) {
-						const startDate = document.getElementById('start-date').value;
-						const endDate = document.getElementById('end-date').value;
-						const startTime = document.getElementById('start-time').value;
-						const endTime = document.getElementById('end-time').value;
-
-						if (!startDate || !endDate || !startTime || !endTime) {
-							return alert("Please select both dates and times.");
-						}
-
-						const startDateTime = new Date(`${startDate}T${startTime}`);
-						const endDateTime = new Date(`${endDate}T${endTime}`);
-
-						if (endDateTime < startDateTime) {
-							return alert("End date/time cannot be before start date/time.");
-						}
-
-						responses.startDate = startDate;
-						responses.startTime = startTime;
-						responses.endDate = endDate;
-						responses.endTime = endTime;
-					}
-
-					// Go to the next step
-					showStep(currentStep + 1);
-				});
-			});
-
-			const prevBtns = document.querySelectorAll('.prev-btn');
-
-			prevBtns.forEach(btn => {
-				btn.addEventListener('click', () => {
-					if (currentStep > 0) {
-						showStep(currentStep - 1);
-					}
-				});
-			});
-
-			choiceBtns.forEach(btn => {
-				btn.addEventListener('click', () => {
-					responses.style = btn.dataset.answer;
-					showStep(currentStep + 1);
-				});
-			});
-
-			const closeBtn = document.querySelector('.close-modal');
-			closeBtn.addEventListener('click', () => {
-				modal.style.display = 'none';
-			});
-
-			submitBtn.addEventListener('click', () => {
-				const notes = document.getElementById('user-notes').value.trim();
-				if (notes) {
-					responses.notes = notes;
-				}
-
-				console.log("Survey Completed:", responses);
-				modal.style.display = 'none';
-			});
 		});
 
+		// --- Autocomplete for Cities ---
 		const cities = [
-			"Portland, Oregon",
-			"Portland, Maine",
-			"New York, NY",
-			"Los Angeles, CA",
-			"Chicago, IL",
-			"San Francisco, CA",
-			"Austin, TX",
-			"Seattle, WA",
-			"Miami, FL",
-			"Boston, MA"
+			"Portland, Oregon", "Portland, Maine", "New York, NY", "Los Angeles, CA",
+			"Chicago, IL", "San Francisco, CA", "Austin, TX", "Seattle, WA",
+			"Miami, FL", "Boston, MA"
 		];
 
 		const destinationInput = document.getElementById('step-destination');
 		const suggestionBox = document.getElementById('suggestions');
 
-		// Show matching cities
-		destinationInput.addEventListener('input', () => {
+		destinationInput?.addEventListener('input', () => {
 			const query = destinationInput.value.toLowerCase();
 			suggestionBox.innerHTML = '';
-
 			if (query.length < 2) return;
 
-			const matches = cities.filter(city =>
-				city.toLowerCase().startsWith(query)
-			);
-
+			const matches = cities.filter(city => city.toLowerCase().startsWith(query));
 			matches.forEach(city => {
 				const li = document.createElement('li');
 				li.textContent = city;
@@ -701,38 +636,10 @@
 			});
 		});
 
-		// Hide suggestions when clicking outside
 		document.addEventListener('click', (e) => {
 			if (!destinationInput.contains(e.target) && !suggestionBox.contains(e.target)) {
 				suggestionBox.innerHTML = '';
 			}
-		});
-
-		const environmentButtons = document.querySelectorAll('.env-btn');
-
-		environmentButtons.forEach(btn => {
-			btn.addEventListener('click', () => {
-				const environment = btn.dataset.env;
-				responses.environment = environment;
-
-				console.log("Survey Completed:", responses);
-				document.getElementById('survey-modal').style.display = 'none';
-			});
-		});
-
-		const budgetButtons = document.querySelectorAll('.budget-btn');
-
-		budgetButtons.forEach(btn => {
-			btn.addEventListener('click', () => {
-				// Deselect other buttons
-				budgetButtons.forEach(b => b.classList.remove('selected'));
-
-				// Select current
-				btn.classList.add('selected');
-
-				// Store response
-				responses.budget = btn.dataset.budget;
-			});
 		});
 	</script>
 </body>
