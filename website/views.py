@@ -19,8 +19,21 @@ def main_page():
     """
     Renders the homepage.
     """
-    # return render_template('frontEndDemo.html')
-    return render_template('index.html')
+    cards = [
+        {
+            "location": "Quarry Road Trails",
+            "stars": 4,
+            "tags": ["Outdoors", "Trails", "Hiking"],
+            "description": "A bustling metropolis with tons to offer."
+        },
+        {
+            "location": "Kyoto",
+            "stars": 5,
+            "tags": ["Japan", "Temple", "Nature"],
+            "description": "Peaceful, historic, and culturally rich."
+        }
+    ]
+    return render_template('index.html', cards=cards)
 
 @views_blueprint.route('/get_itinerary', methods=['POST'])
 def get_itinerary():
@@ -202,3 +215,29 @@ def frontend_demo():
 @views_blueprint.route('/landing')
 def landing_page():
     return render_template('landing-page.html')
+
+@views_blueprint.route('/itinerary')
+def itinerary_page():
+    return render_template('itinerary.html')
+
+@views_blueprint.route('/planning')
+def planning_page():
+    return render_template('index.html')
+
+@views_blueprint.route('/')
+def home():
+    cards = [
+        {
+            "location": "New York",
+            "stars": 4,
+            "tags": ["City", "USA", "Urban"],
+            "description": "A bustling metropolis with tons to offer."
+        },
+        {
+            "location": "Kyoto",
+            "stars": 5,
+            "tags": ["Japan", "Temple", "Nature"],
+            "description": "Peaceful, historic, and culturally rich."
+        }
+    ]
+    return render_template("home.html", cards=cards)
