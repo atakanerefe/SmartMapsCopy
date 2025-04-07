@@ -13,6 +13,7 @@ from website.gemini_api import make_gemini_request  # Use the AI function
 
 views_blueprint = Blueprint("views", __name__)
 weather_api_key = os.environ.get('WEATHER_KEY')
+mapbox_api_key = os.environ.get('MAPBOX_KEY')
 
 @views_blueprint.route('/', methods=['GET'])
 def main_page():
@@ -222,7 +223,7 @@ def itinerary_page():
 
 @views_blueprint.route('/planning')
 def planning_page():
-    return render_template('index.html')
+    return render_template('index.html', mapbox_key=mapbox_api_key)
 
 @views_blueprint.route('/')
 def home():
