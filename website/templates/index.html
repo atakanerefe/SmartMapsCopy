@@ -16,22 +16,14 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 </head>
 
-<body class="homepage is-preload">
+<body class="right-sidebar is-preload">
 	<div id="page-wrapper">
-		<!-- Header -->
-		<section id="header" class="wrapper">
-			<nav id="nav">
-				<ul>
-					<li class="current"><a href="{{ url_for('views.landing_page') }}">Home</a></li>
-					<li><a href="{{ url_for('views.planning_page') }}">New Travel Planner</a></li>
-					<li><a href="{{ url_for('views.frontend_demo') }}">Old Travel Planner</a></li>
-					<li><a href="{{ url_for('views.itinerary_page') }}">Itinerary</a></li>
-				</ul>
-			</nav>
-		</section>
+
+		{% include 'header.html' %}
 
 		<!-- Custom Planner UI Section -->
-		<section id="planner-ui" class="wrapper">
+		<section id="main" class="wrapper style2">
+			<div class="title">Planner</div>
 			<div class="container">
 
 				<!-- Trip Summary -->
