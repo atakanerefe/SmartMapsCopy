@@ -19,8 +19,21 @@ def main_page():
     """
     Renders the homepage.
     """
-    # return render_template('frontEndDemo.html')
-    return render_template('index.html')
+    cards = [
+        {
+            "location": "Quarry Road Trails",
+            "stars": 4,
+            "tags": ["Outdoors", "Trails", "Hiking"],
+            "description": "A bustling metropolis with tons to offer."
+        },
+        {
+            "location": "Kyoto",
+            "stars": 5,
+            "tags": ["Japan", "Temple", "Nature"],
+            "description": "Peaceful, historic, and culturally rich."
+        }
+    ]
+    return render_template('index.html', cards=cards)
 
 @views_blueprint.route('/get_itinerary', methods=['POST'])
 def get_itinerary():
@@ -202,3 +215,95 @@ def frontend_demo():
 @views_blueprint.route('/landing')
 def landing_page():
     return render_template('landing-page.html')
+
+@views_blueprint.route('/itinerary')
+def itinerary_page():
+    return render_template('itinerary.html')
+
+@views_blueprint.route('/planning')
+def planning_page():
+    return render_template('index.html')
+
+@views_blueprint.route('/')
+def home():
+    cards = [
+        {
+            "location": "New York",
+            "stars": 4,
+            "tags": ["City", "USA", "Urban"],
+            "description": "A bustling metropolis with tons to offer."
+        },
+        {
+            "location": "Kyoto",
+            "stars": 5,
+            "tags": ["Japan", "Temple", "Nature"],
+            "description": "Peaceful, historic, and culturally rich."
+        }
+    ]
+    return render_template("home.html", cards=cards)
+
+from flask import request, jsonify
+from website.gemini_api import make_gemini_request
+
+
+import json
+import re
+
+def generate_cards_from_responses(data):
+    # Build your prompt like you're doing now
+    destination = data.get("destination", "a destination")
+    environment = data.get("environment", "any")
+    budget = data.get("budget", "any")
+    vibe = data.get("vibe", "any vibe")
+    diet = data.get("diet", "no dietary restrictions")
+    notes = data.get("notes", "")
+
+    prompt = (
+        f"I'm planning a trip to {destination}. I prefer {environment.lower()} activities,"
+        f" my budget is {budget}, and I enjoy places that feel {vibe.lower()}."
+        f" I have the following dietary restrictions: {diet}."
+        f" {notes if notes else ''}"
+        " Based on that, suggest 3 travel spots or experiences that match my preferences."
+        " Return them as JSON with location, stars (1-5), tags (as an array), and a short description."
+        " Do NOT wrap the output in markdown or ```."
+    )
+
+    try:
+        raw_response = make_gemini_request(prompt)
+        # print("Gemini raw response:\n", raw_response)
+
+        # Clean response (strip triple backticks if Gemini ignored your instruction)
+        cleaned = re.sub(r"```(?:json)?\s*|```", "", raw_response).strip()
+
+        cards = json.loads(cleaned)
+
+        if isinstance(cards, list):
+            return {"cards": cards}
+        elif isinstance(cards, dict) and "cards" in cards:
+            return cards
+        else:
+            raise ValueError("Unexpected format")
+
+    except Exception as e:
+        print("Error parsing Gemini response:", e)
+        return {
+            "cards": [{
+                "location": "Error generating cards",
+                "stars": 3,
+                "tags": ["fallback"],
+                "description": "We couldn't generate recommendations right now. Please try again later."
+            }]
+        }
+
+
+@views_blueprint.route("/submit_survey", methods=["POST"])
+def submit_survey():
+    try:
+        data = request.get_json()
+        print("Survey data received:", data)
+
+        cards = generate_cards_from_responses(data)
+        return jsonify(cards)
+    except Exception as e:
+        print("Error in /submit_survey:", e)
+        return jsonify({"error": str(e)}), 500
