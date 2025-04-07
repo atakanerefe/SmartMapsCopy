@@ -61,7 +61,13 @@
 						<div class="card-container">
 							{% for item in cards %}
 							<div class="card">
-								<h2 class="location">{{ item.location }}</h2>
+								<div class="card-top">
+									<h2 class="location">{{ item.location }}</h2>
+									<label class="select-wrapper">
+										<input type="checkbox" name="select_{{ loop.index }}">
+										<span class="select-label">Select</span>
+									</label>
+								</div>
 								<div class="rating">
 									{% for _ in range(item.stars) %}⭐{% endfor %}
 								</div>
@@ -71,7 +77,6 @@
 									{% endfor %}
 								</div>
 								<p class="description">{{ item.description }}</p>
-								<label><input type="checkbox" name="select_{{ loop.index }}"> Select</label>
 							</div>
 							{% endfor %}
 						</div>
