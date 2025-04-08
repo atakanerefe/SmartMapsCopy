@@ -1,20 +1,9 @@
-<!-- Header -->
-<section id="header" class="wrapper">
-
-  <!-- Logo -->
-    <div id="logo">
-      <h1><a href="index.html">SmartMaps</a></h1>
-      <p>Plan your travels through a single app</p>
-    </div>
-
-  <!-- Nav -->
-    <nav id="nav">
-      <ul>
-        <li class="current"><a href="{{ url_for('views.landing_page') }}">Home</a></li>
-        <li><a href="{{ url_for('views.planning_page') }}">Plan</a></li>
-        <li><a href="{{ url_for('views.itinerary_page') }}">Itinerary</a></li>
-        <li><a href="#">Logout</a></li>
-      </ul>
-    </nav>
-
-</section>
+<head>
+	<title>SmartMaps</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="static/css/main.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+	<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+	<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+</head>
