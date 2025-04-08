@@ -147,16 +147,19 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(res => res.json())
             .then(data => {
                 const container = document.querySelector(".card-container");
-                container.innerHTML = ""; // clear existing cards
+                container.innerHTML = ""; 
 
                 data.cards.forEach(card => {
                     const cardHTML = `
                         <div class="card">
+                            <img src="${card.image}" alt="Image of ${card.location}" class="card-image" />
+
+                            <div class="card-content">
                             <div class="card-top">
                                 <h2 class="location">${card.location}</h2>
                                 <label class="select-wrapper">
-                                    <input type="checkbox" name="select">
-                                    <span class="select-label">Select</span>
+                                <input type="checkbox" name="select">
+                                <span class="select-label">Select</span>
                                 </label>
                             </div>
                             <div class="rating">${"⭐".repeat(Math.round(card.stars))}</div>
@@ -164,8 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${card.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
                             </div>
                             <p class="description">${card.description}</p>
+                            </div>
                         </div>
-                    `;
+                        `;
                     container.insertAdjacentHTML("beforeend", cardHTML);
                 });
             })

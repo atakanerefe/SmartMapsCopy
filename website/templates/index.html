@@ -53,25 +53,37 @@
 						<!-- Selected Tags -->
 						<div class="selected-tags" id="selected-tags"></div>
 
+
 						<div class="card-container">
 							{% for item in cards %}
+							<p>Cards count: {{ cards | length }}</p>
+
 							<div class="card">
-								<div class="card-top">
-									<h2 class="location">{{ item.location }}</h2>
-									<label class="select-wrapper">
-										<input type="checkbox" name="select_{{ loop.index }}">
-										<span class="select-label">Select</span>
-									</label>
+								<img src="{{ item.image }}" alt="Image of {{ item.location }}" class="card-image" />
+
+								<p style="font-size: 12px; color: gray;">Image URL: {{ item.image }}</p>
+
+								<div class="card-content">
+									<div class="card-top">
+										<h2 class="location">{{ item.location }}</h2>
+										<label class="select-wrapper">
+											<input type="checkbox" name="select_{{ loop.index }}">
+											<span class="select-label">Select</span>
+										</label>
+									</div>
+
+									<div class="rating">
+										{% for _ in range(item.stars) %}⭐{% endfor %}
+									</div>
+
+									<div class="tags">
+										{% for tag in item.tags %}
+										<span class="tag">{{ tag }}</span>
+										{% endfor %}
+									</div>
+
+									<p class="description">{{ item.description }}</p>
 								</div>
-								<div class="rating">
-									{% for _ in range(item.stars) %}⭐{% endfor %}
-								</div>
-								<div class="tags">
-									{% for tag in item.tags %}
-									<span class="tag">{{ tag }}</span>
-									{% endfor %}
-								</div>
-								<p class="description">{{ item.description }}</p>
 							</div>
 							{% endfor %}
 						</div>
@@ -395,6 +407,66 @@
 			if (!destinationInput.contains(e.target) && !suggestionBox.contains(e.target)) {
 				suggestionBox.innerHTML = '';
 			}
+		});
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const surveyForm = document.querySelector('.submit-btn');
+			const cardContainer = document.querySelector('.card-container');
+
+			surveyForm?.addEventListener('click', async () => {
+				// Grab survey responses here however you're collecting them
+				const surveyData = {
+					destination: document.getElementById('step-destination').value,
+					environment: document.querySelector('.choice-btn[data-env].active')?.dataset.env || "Any",
+					budget: document.querySelector('.choice-btn[data-budget].active')?.dataset.budget || "Any",
+					vibe: document.querySelector('.choice-btn[data-choice].active')?.dataset.choice || "Any",
+					diet: document.querySelector('.choice-btn[data-diet].active')?.dataset.diet || "None",
+					notes: document.getElementById('user-notes')?.value || ""
+				};
+
+				try {
+					const response = await fetch("/submit_survey", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(surveyData)
+					});
+
+					const data = await response.json();
+					console.log("Received cards:", data.cards);
+
+					cardContainer.innerHTML = "";
+
+					data.cards.forEach(item => {
+						const cardEl = document.createElement("div");
+						cardEl.className = "card";
+						cardEl.innerHTML = `
+							<img src="${item.image}" alt="Image of ${item.location}" class="card-image" />
+							<div class="card-content">
+								<div class="card-top">
+								<h2 class="location">${item.location}</h2>
+								<label class="select-wrapper">
+									<input type="checkbox" name="select_${item.location}">
+									<span class="select-label">Select</span>
+								</label>
+								</div>
+								<div class="rating">
+								${"⭐".repeat(item.stars || 0)}
+								</div>
+								<div class="tags">
+								${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
+								</div>
+								<p class="description">${item.description}</p>
+							</div>
+							`;
+						cardContainer.appendChild(cardEl);
+					});
+
+				} catch (err) {
+					console.error("Failed to submit survey:", err);
+				}
+			});
 		});
 	</script>
 
