@@ -7,26 +7,30 @@ It includes:
 """
 
 import os
-from flask import Blueprint, request, jsonify, render_template
+from datetime import datetime
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for
+from flask_login import current_user, login_required
 import requests
-from website.gemini_api import make_gemini_request  
+from .models import User, Event
+from website.gemini_api import make_gemini_request
+from website import db
 import json
 import re
-
 
 views_blueprint = Blueprint("views", __name__)
 
 weather_api_key = os.environ.get('WEATHER_KEY')
 mapbox_api_key = os.environ.get('MAPBOX_KEY')
 
-@views_blueprint.route('/', methods=['GET'])
+@views_blueprint.route('/', methods=['GET', 'POST'])
 def main_page():
     """
     Renders the homepage.
     """
-    return render_template('index.html', cards=[], mapbox_key=mapbox_api_key)
+    return redirect(url_for('views.landing_page'))
 
 @views_blueprint.route('/get_itinerary', methods=['POST'])
+@login_required
 def get_itinerary():
     """
     Handles itinerary generation requests via the Gemini API.
@@ -208,31 +212,14 @@ def landing_page():
     return render_template('landing-page.html')
 
 @views_blueprint.route('/itinerary')
+@login_required
 def itinerary_page():
-    return render_template('itinerary.html')
+    return render_template('schedule.html')
 
 @views_blueprint.route('/planning')
+@login_required
 def planning_page():
     return render_template('index.html', cards=[], mapbox_key=mapbox_api_key)
-
-@views_blueprint.route('/')
-def home():
-    cards = [
-        {
-            "location": "New York",
-            "stars": 4,
-            "tags": ["City", "USA", "Urban"],
-            "description": "A bustling metropolis with tons to offer."
-        },
-        {
-            "location": "Kyoto",
-            "stars": 5,
-            "tags": ["Japan", "Temple", "Nature"],
-            "description": "Peaceful, historic, and culturally rich."
-        }
-    ]
-    return render_template("home.html", cards=cards)
-
 
 def fetch_unsplash_image(query):
     unsplash_access_key = os.environ.get('UNSPLASH_KEY')
@@ -308,8 +295,8 @@ def generate_cards_from_responses(data):
             }]
         }
 
-
 @views_blueprint.route("/submit_survey", methods=["POST"])
+@login_required
 def submit_survey():
     try:
         data = request.get_json()
@@ -320,3 +307,61 @@ def submit_survey():
     except Exception as e:
         print("Error in /submit_survey:", e)
         return jsonify({"error": str(e)}), 500
+
+@views_blueprint.route("/save_itinerary", methods=["POST"])
+@login_required
+def save_itinerary_to_database():
+    """
+    Endpoint to save the itinerary.
+    """
+    print("Saving itinerary to database...")
+    events = request.get_json().get("events", [])
+    if not events:
+        return jsonify({"error": "No events provided"}), 400
+
+    print("Events received:", events)
+
+    for event in events:
+        title = event["title"]
+        start = datetime.strptime(event["start"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        print("event start saving:", start)
+        end = datetime.strptime(event["start"], "%Y-%m-%dT%H:%M:%S.%fZ") if event["end"] else None
+        all_day = event["allDay"]
+
+        # Create a new Event instance
+        new_event = Event(
+            title=title,
+            start=start,
+            end=end,
+            all_day=all_day,
+            user_id=current_user.id
+        )
+
+        # Add the event to the calendar
+        db.session.add(new_event)
+    
+    db.session.commit()
+
+    return jsonify({"message": "Itinerary saved successfully!"}), 200
+
+@views_blueprint.route("/get_itinerary", methods=["GET"])
+@login_required
+def get_itinerary_from_database():
+    """
+    Endpoint to get the itinerary.
+    """
+    print("Fetching itinerary from database...")
+    user_id = current_user.id
+    events = Event.query.filter_by(user_id=user_id).all()
+
+    itinerary = []
+    for event in events:
+        print("event start fetching:", event.start)
+        itinerary.append({
+            "title": event.title,
+            "start": f'{event.start.isoformat()}Z',
+            "end": f'{event.end.isoformat()}Z' if event.end else None,
+            "allDay": event.all_day
+        })
+
+    return jsonify({'events': itinerary}), 200

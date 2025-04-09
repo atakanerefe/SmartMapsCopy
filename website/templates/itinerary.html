@@ -10,6 +10,37 @@
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
     <script>
+      function saveCalendarData(events) {
+        // save to calendar object in database
+        //calendar = document.getElementById('calendar');
+        events = events.map(event => {
+          console.log(event.start.toISOString())
+          return {
+            title: event.title,
+            start: event.start.toISOString(),
+            end: event.end ? event.end.toISOString() : null,
+            allDay: event.allDay,
+          };
+        });
+        console.log(events);
+        
+        fetch('/save_itinerary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            events: events
+          })
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('Calendar data saved successfully');
+          } else {
+            console.error('Error saving calendar data');
+          }
+        })
+      }
 
       document.addEventListener('DOMContentLoaded', function() {
         var Calendar = FullCalendar.Calendar;
@@ -48,9 +79,22 @@
               // if so, remove the element from the "Draggable Events" list
               info.draggedEl.parentNode.removeChild(info.draggedEl);
             }
-          }
+          },
+          eventReceive: function(info) {
+            saveCalendarData([info.event]);
+          },
         });
-      
+
+        fetch('/get_itinerary')
+          .then(response => response.json())
+          .then(data => {
+            const events = data.events;
+            calendar.addEventSource(events);
+          })
+          .catch(error => {
+            console.error('Error fetching calendar data:', error);
+          });
+
         calendar.render();
       });
     </script>
@@ -65,7 +109,41 @@
       <!-- Custom Planner UI Section -->
       <section id="main" class="wrapper style3">
         <div class="title">Itinerary</div>
-        <div class="container">
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+              font-size: 12px;
+            }
+            
+            #external-events {
+              position: fixed;
+              z-index: 2;
+              top: 20px;
+              left: 20px;
+              width: 150px;
+              padding: 0 10px;
+              border: 1px solid #ccc;
+              background: #eee;
+            }
+            
+            #external-events .fc-event {
+              cursor: move;
+              margin: 3px 0;
+            }
+            
+            #calendar-container {
+              position: relative;
+              z-index: 1;
+              margin-left: 0px;
+            }
+            
+            #calendar {
+              max-width: 1300px;
+              margin: 20px auto;
+            }
+          </style>
           <div id='external-events'>
             <p>
               <strong>Draggable Events</strong>
@@ -96,7 +174,6 @@
           <div id='calendar-container'>
             <div id='calendar'></div>
           </div>
-        </div>
       </section>
     </div>
   </body>

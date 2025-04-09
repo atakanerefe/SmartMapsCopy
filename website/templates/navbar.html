@@ -13,7 +13,7 @@
         <li class="current"><a href="{{ url_for('views.landing_page') }}">Home</a></li>
         <li><a href="{{ url_for('views.planning_page') }}">Plan</a></li>
         <li><a href="{{ url_for('views.itinerary_page') }}">Itinerary</a></li>
-        <li><a href="#">Logout</a></li>
+        <li><a href="{{ url_for ('auth.google_login') }}">Logout</a></li>
       </ul>
     </nav>
 
