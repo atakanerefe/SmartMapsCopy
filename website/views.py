@@ -18,6 +18,7 @@ import json
 import re
 
 views_blueprint = Blueprint("views", __name__)
+
 weather_api_key = os.environ.get('WEATHER_KEY')
 mapbox_api_key = os.environ.get('MAPBOX_KEY')
 
@@ -218,7 +219,19 @@ def itinerary_page():
 @views_blueprint.route('/planning')
 @login_required
 def planning_page():
-    return render_template('index.html', mapbox_key=mapbox_api_key)
+    return render_template('index.html', cards=[], mapbox_key=mapbox_api_key)
+
+def fetch_unsplash_image(query):
+    unsplash_access_key = os.environ.get('UNSPLASH_KEY')
+    url = f"https://api.unsplash.com/search/photos?query={query}&client_id={unsplash_access_key}&per_page=1"
+    try:
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        if data["results"]:
+            return data["results"][0]["urls"]["regular"]
+    except Exception as e:
+        print(f"Unsplash error for {query}: {e}")
+    return None
 
 def generate_cards_from_responses(data):
     # Build your prompt like you're doing now
@@ -241,19 +254,35 @@ def generate_cards_from_responses(data):
 
     try:
         raw_response = make_gemini_request(prompt)
-        # print("Gemini raw response:\n", raw_response)
 
-        # Clean response (strip triple backticks if Gemini ignored your instruction)
         cleaned = re.sub(r"```(?:json)?\s*|```", "", raw_response).strip()
-
         cards = json.loads(cleaned)
 
         if isinstance(cards, list):
+            for card in cards:
+                location = card.get("location")
+                image_url = fetch_unsplash_image(location)
+                card["image"] = image_url or "/static/img/no-image-available.png"  # fallback
             return {"cards": cards}
+
         elif isinstance(cards, dict) and "cards" in cards:
+            for card in cards["cards"]:
+                location = card.get("location")
+                image_url = fetch_unsplash_image(location)
+                card["image"] = image_url or "/static/img/no-image-available.png"
             return cards
+
         else:
-            raise ValueError("Unexpected format")
+            print("Error parsing Gemini response:", e)
+            return {
+                "cards": [{
+                    "location": "Error generating cards",
+                    "stars": 3,
+                    "tags": ["fallback"],
+                    "description": "We couldn't generate recommendations right now. Please try again later.",
+                    "image": "/static/default-image.jpg"
+                }]
+            }
 
     except Exception as e:
         print("Error parsing Gemini response:", e)
