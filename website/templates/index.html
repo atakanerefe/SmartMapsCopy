@@ -14,8 +14,6 @@
 	<div id="page-wrapper">
 
 		{% include 'navbar.html' %}
-
-
 		<!-- Custom Planner UI Section -->
 		<section id="main" class="wrapper style2">
 			<div class="title">Planner</div>
@@ -274,22 +272,6 @@
 
 	<script>
 		document.addEventListener('DOMContentLoaded', () => {
-			// --- Initialize Choices.js ---
-			new Choices('#activity-select', {
-				removeItemButton: true,
-				placeholderValue: 'Activity Types',
-			});
-
-			new Choices('#environment-select', {
-				removeItemButton: true,
-				placeholderValue: 'Select environments',
-			});
-
-			new Choices('#budget-select', {
-				removeItemButton: true,
-				placeholderValue: 'Budgets',
-			});
-
 			// --- Handle Recommendation Bubble Tags ---
 			const selectedTags = document.getElementById('selected-tags');
 			const bubbleGrid = document.getElementById('bubble-grid');

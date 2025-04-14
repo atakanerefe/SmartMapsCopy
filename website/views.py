@@ -7,20 +7,23 @@ It includes:
 """
 
 import os
+import json
+import re
 from datetime import datetime
+
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from flask_login import current_user, login_required
 import requests
-from .models import User, Event
-from website.gemini_api import make_gemini_request
+
 from website import db
-import json
-import re
+from website.gemini_api import make_gemini_request
+from .models import Event
 
 views_blueprint = Blueprint("views", __name__)
 
 weather_api_key = os.environ.get('WEATHER_KEY')
 mapbox_api_key = os.environ.get('MAPBOX_KEY')
+
 
 @views_blueprint.route('/', methods=['GET', 'POST'])
 def main_page():
@@ -28,6 +31,7 @@ def main_page():
     Renders the homepage.
     """
     return redirect(url_for('views.landing_page'))
+
 
 @views_blueprint.route('/get_itinerary', methods=['POST'])
 @login_required
@@ -86,6 +90,7 @@ def get_itinerary():
     itinerary = make_gemini_request(prompt)
 
     return {"itinerary": itinerary}
+
 
 def get_weather_details(city, country, state):
     """
@@ -163,6 +168,7 @@ def get_weather_details(city, country, state):
 
     return weather_details
 
+
 def get_weather(city, country, state=None, test=False):
     """
     Fetches weather data for the specified location using the OpenWeatherMap API.
@@ -203,38 +209,79 @@ def get_weather(city, country, state=None, test=False):
 
     return weather_data, error_message
 
+
 @views_blueprint.route('/demo')
 def frontend_demo():
+    """
+    Renders the front-end demo page for testing UI components.
+    """
     return render_template('frontEndDemo.html')
+
 
 @views_blueprint.route('/landing')
 def landing_page():
+    """
+    Renders the landing page of the SmartMaps application.
+    """
     return render_template('landing-page.html')
+
 
 @views_blueprint.route('/itinerary')
 @login_required
 def itinerary_page():
+    """
+    Renders the schedule view page for the user's itinerary.
+    Requires user to be logged in.
+    """
     return render_template('schedule.html')
+
 
 @views_blueprint.route('/planning')
 @login_required
 def planning_page():
+    """
+    Renders the planning interface with recommendation cards.
+    Requires user to be logged in.
+    """
     return render_template('index.html', cards=[], mapbox_key=mapbox_api_key)
 
+
 def fetch_unsplash_image(query):
+    """
+    Fetches an image URL from Unsplash based on the given query.
+
+    Args:
+        query (str): Search term to look for relevant images.
+
+    Returns:
+        str or None: A direct URL to the image if found, otherwise None.
+    """
     unsplash_access_key = os.environ.get('UNSPLASH_KEY')
-    url = f"https://api.unsplash.com/search/photos?query={query}&client_id={unsplash_access_key}&per_page=1"
+    url = (
+        f"https://api.unsplash.com/search/photos?query={query}"
+        f"&client_id={unsplash_access_key}&per_page=1"
+    )
     try:
         response = requests.get(url, timeout=10)
         data = response.json()
         if data["results"]:
             return data["results"][0]["urls"]["regular"]
-    except Exception as e:
-        print(f"Unsplash error for {query}: {e}")
+    except requests.RequestException as e:
+        print(f"Unsplash request error for {query}: {e}")
     return None
 
+
 def generate_cards_from_responses(data):
-    # Build your prompt like you're doing now
+    """
+    Generates travel recommendation cards using the Gemini API 
+    and enriches each with an Unsplash image.
+
+    Args:
+        data (dict): Dictionary of user preferences.
+
+    Returns:
+        dict: A dictionary with a "cards" key containing a list of cards.
+    """
     destination = data.get("destination", "a destination")
     environment = data.get("environment", "any")
     budget = data.get("budget", "any")
@@ -248,13 +295,16 @@ def generate_cards_from_responses(data):
         f" I have the following dietary restrictions: {diet}."
         f" {notes if notes else ''}"
         " Based on that, suggest 3 travel spots or experiences that match my preferences."
-        " Return them as JSON with location, stars (1-5), tags (as an array), and a short description."
+        " Return them as JSON with:"
+        " - location"
+        " - stars (1–5)"
+        " - tags (as an array)"
+        " - a short description."
         " Do NOT wrap the output in markdown or ```."
     )
 
     try:
         raw_response = make_gemini_request(prompt)
-
         cleaned = re.sub(r"```(?:json)?\s*|```", "", raw_response).strip()
         cards = json.loads(cleaned)
 
@@ -262,51 +312,75 @@ def generate_cards_from_responses(data):
             for card in cards:
                 location = card.get("location")
                 image_url = fetch_unsplash_image(location)
-                card["image"] = image_url or "/static/img/no-image-available.png"  # fallback
+                card["image"] = image_url or "/static/img/no-image-available.png"
             return {"cards": cards}
 
-        elif isinstance(cards, dict) and "cards" in cards:
+        if isinstance(cards, dict) and "cards" in cards:
             for card in cards["cards"]:
                 location = card.get("location")
                 image_url = fetch_unsplash_image(location)
                 card["image"] = image_url or "/static/img/no-image-available.png"
             return cards
 
-        else:
-            print("Error parsing Gemini response:", e)
-            return {
-                "cards": [{
-                    "location": "Error generating cards",
-                    "stars": 3,
-                    "tags": ["fallback"],
-                    "description": "We couldn't generate recommendations right now. Please try again later.",
-                    "image": "/static/default-image.jpg"
-                }]
-            }
+        # Ensure return even in unexpected structure
+        print("Error parsing Gemini response structure")
+        return {
+            "cards": [{
+                "location": "Error generating cards",
+                "stars": 3,
+                "tags": ["fallback"],
+                "description": (
+                    "We couldn't generate recommendations right now. "
+                    "Please try again later."
+                ),
+                "image": "/static/default-image.jpg",
+            }]
+        }
 
-    except Exception as e:
+    except (json.JSONDecodeError, TypeError, KeyError) as e:
         print("Error parsing Gemini response:", e)
         return {
             "cards": [{
                 "location": "Error generating cards",
                 "stars": 3,
                 "tags": ["fallback"],
-                "description": "We couldn't generate recommendations right now. Please try again later."
+                "description": (
+                    "We couldn't generate recommendations right now. "
+                    "Please try again later."
+                ),
+                "image": "/static/default-image.jpg",
             }]
         }
+
 
 @views_blueprint.route("/submit_survey", methods=["POST"])
 @login_required
 def submit_survey():
+    """
+    Handles survey submission from the frontend.
+
+    Expects:
+        JSON payload with user preferences including:
+        - destination, environment, budget, vibe, diet, notes (optional)
+
+    Returns:
+        JSON: A dictionary with a "cards" key containing a list of recommendation cards.
+              If an error occurs, returns an appropriate error message and status code.
+    """
     try:
         data = request.get_json()
-        print("Survey data received:", data)
 
+        if not isinstance(data, dict):
+            return jsonify({"error": "Invalid input format. Expected a JSON object."}), 400
+
+        print("Survey data received:", data)
         cards = generate_cards_from_responses(data)
         return jsonify(cards)
+
     except Exception as e:
-        print("Error in /submit_survey:", e)
-        return jsonify({"error": str(e)}), 500
+        print("Unhandled error in /submit_survey:", e)
+        return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+
 
 @views_blueprint.route("/save_itinerary", methods=["POST"])
 @login_required
@@ -325,7 +399,8 @@ def save_itinerary_to_database():
         title = event["title"]
         start = datetime.strptime(event["start"], "%Y-%m-%dT%H:%M:%S.%fZ")
         print("event start saving:", start)
-        end = datetime.strptime(event["start"], "%Y-%m-%dT%H:%M:%S.%fZ") if event["end"] else None
+        end = datetime.strptime(
+            event["start"], "%Y-%m-%dT%H:%M:%S.%fZ") if event["end"] else None
         all_day = event["allDay"]
 
         # Create a new Event instance
@@ -339,10 +414,11 @@ def save_itinerary_to_database():
 
         # Add the event to the calendar
         db.session.add(new_event)
-    
+
     db.session.commit()
 
     return jsonify({"message": "Itinerary saved successfully!"}), 200
+
 
 @views_blueprint.route("/get_itinerary", methods=["GET"])
 @login_required

@@ -42,7 +42,6 @@ def make_gemini_request(prompt):
             return response.json()["candidates"][0]["content"]["parts"][0]["text"]
         except (KeyError, IndexError):
             return "Sorry, I couldn't generate a response."
-        
     print("Sending to Gemini:", prompt)
 
     return f"Error: Request failed with status {response.status_code}"
