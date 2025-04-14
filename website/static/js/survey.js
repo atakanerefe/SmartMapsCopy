@@ -101,42 +101,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     submitBtn.addEventListener('click', () => {
+        const loadingSpinner = document.getElementById('loading-spinner');
+    
+        // Show loading spinner immediately
+        loadingSpinner.classList.remove('hidden');
+    
+        // Close the survey modal immediately
+        modal.style.display = 'none';
+    
         const notes = document.getElementById('user-notes').value.trim();
         if (notes) {
             window.responses.notes = notes;
         }
-
+    
         const tags = document.getElementById('selected-tags');
         tags.innerHTML = '';
-
+    
         const addTag = (text) => {
             const tag = document.createElement('span');
             tag.classList.add('tag');
             tag.textContent = text;
             tags.appendChild(tag);
         };
-
-        if (window.responses.environment) addTag(`${window.responses.environment}`);
-        if (window.responses.budget) addTag(`${window.responses.budget}`);
-        if (window.responses.vibe) addTag(`${window.responses.vibe}`);
-        if (window.responses.diet) addTag(`${window.responses.diet}`);
-        if (window.responses.notes) addTag(`Note added`);
-
+    
+        if (window.responses.environment) addTag(window.responses.environment);
+        if (window.responses.budget) addTag(window.responses.budget);
+        if (window.responses.vibe) addTag(window.responses.vibe);
+        if (window.responses.diet) addTag(window.responses.diet);
+        if (window.responses.notes) addTag('Note added');
+    
         document.getElementById('summary-location').textContent = window.responses.destination || 'Not specified';
-        if (window.responses.startDate && window.responses.endDate) {
-            document.getElementById('summary-date').textContent = `${window.responses.startDate} – ${window.responses.endDate}`;
-        } else if (window.responses.startDate) {
-            document.getElementById('summary-date').textContent = `${window.responses.startDate}`;
-        } else {
-            document.getElementById('summary-date').textContent = 'Not specified';
-        }
-
-        if (window.responses.startTime && window.responses.endTime) {
-            document.getElementById('summary-time').textContent = `${window.responses.startTime} – ${window.responses.endTime}`;
-        } else {
-            document.getElementById('summary-time').textContent = 'Not specified';
-        }
-
+        document.getElementById('summary-date').textContent =
+            window.responses.startDate && window.responses.endDate
+                ? `${window.responses.startDate} – ${window.responses.endDate}`
+                : window.responses.startDate || 'Not specified';
+    
+        document.getElementById('summary-time').textContent =
+            window.responses.startTime && window.responses.endTime
+                ? `${window.responses.startTime} – ${window.responses.endTime}`
+                : 'Not specified';
+    
         fetch("/submit_survey", {
             method: "POST",
             headers: {
@@ -144,22 +148,21 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify(window.responses),
         })
-            .then(res => res.json())
-            .then(data => {
-                const container = document.querySelector(".card-container");
-                container.innerHTML = ""; 
-
-                data.cards.forEach(card => {
-                    const cardHTML = `
-                        <div class="card">
-                            <img src="${card.image}" alt="Image of ${card.location}" class="card-image" />
-
-                            <div class="card-content">
+        .then(res => res.json())
+        .then(data => {
+            const container = document.querySelector(".card-container");
+            container.innerHTML = "";
+    
+            data.cards.forEach(card => {
+                const cardHTML = `
+                    <div class="card">
+                        <img src="${card.image}" alt="Image of ${card.location}" class="card-image" />
+                        <div class="card-content">
                             <div class="card-top">
                                 <h2 class="location">${card.location}</h2>
                                 <label class="select-wrapper">
-                                <input type="checkbox" name="select">
-                                <span class="select-label">Select</span>
+                                    <input type="checkbox" name="select">
+                                    <span class="select-label">Select</span>
                                 </label>
                             </div>
                             <div class="rating">${"⭐".repeat(Math.round(card.stars))}</div>
@@ -167,17 +170,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${card.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
                             </div>
                             <p class="description">${card.description}</p>
-                            </div>
                         </div>
-                        `;
-                    container.insertAdjacentHTML("beforeend", cardHTML);
-                });
-            })
-            .catch(err => {
-                console.error("Error fetching cards:", err);
+                    </div>
+                `;
+                container.insertAdjacentHTML("beforeend", cardHTML);
             });
-
-        modal.style.display = 'none';
-        console.log("Survey Completed:", window.responses);
+    
+            // Hide loading spinner AFTER cards load
+            loadingSpinner.classList.add('hidden');
+            console.log("Survey Completed:", window.responses);
+        })
+        .catch(err => {
+            loadingSpinner.classList.add('hidden');
+            console.error("Error fetching cards:", err);
+        });
     });
 });
