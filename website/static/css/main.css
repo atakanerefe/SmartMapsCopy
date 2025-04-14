@@ -3529,6 +3529,21 @@ ul.actions.special {
 	animation: fadeIn 0.3s ease;
 }
 
+.login-prompt p {
+	font-size: 0.9rem;
+	color: #555;
+	margin: 0;
+}
+
+.login-prompt a {
+	color: #007BFF;
+	text-decoration: none;
+}
+
+.login-prompt a:hover {
+	text-decoration: underline;
+}
+
 @keyframes fadeIn {
 	from {
 		opacity: 0;
