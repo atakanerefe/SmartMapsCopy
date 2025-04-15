@@ -30,7 +30,6 @@ def main_page():
     return redirect(url_for('views.landing_page'))
 
 @views_blueprint.route('/get_itinerary', methods=['POST'])
-@login_required
 def get_itinerary():
     """
     Handles itinerary generation requests via the Gemini API.
@@ -217,7 +216,6 @@ def itinerary_page():
     return render_template('schedule.html')
 
 @views_blueprint.route('/planning')
-@login_required
 def planning_page():
     return render_template('index.html', cards=[], mapbox_key=mapbox_api_key)
 
@@ -296,7 +294,6 @@ def generate_cards_from_responses(data):
         }
 
 @views_blueprint.route("/submit_survey", methods=["POST"])
-@login_required
 def submit_survey():
     try:
         data = request.get_json()
@@ -309,7 +306,7 @@ def submit_survey():
         return jsonify({"error": str(e)}), 500
 
 @views_blueprint.route("/save_itinerary", methods=["POST"])
-@login_required
+# @login_required # add back with login prompt later
 def save_itinerary_to_database():
     """
     Endpoint to save the itinerary.
@@ -345,7 +342,7 @@ def save_itinerary_to_database():
     return jsonify({"message": "Itinerary saved successfully!"}), 200
 
 @views_blueprint.route("/get_itinerary", methods=["GET"])
-@login_required
+# add version to return empty when not logged in
 def get_itinerary_from_database():
     """
     Endpoint to get the itinerary.
