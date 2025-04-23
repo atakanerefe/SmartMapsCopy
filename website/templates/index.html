@@ -37,7 +37,7 @@
 									<ul id="suggestions" class="autocomplete-list"></ul>
 								</div>
 							</div>
-							
+
 							<div class="trip-item">
 								<strong>Arrival</strong>
 								<div class="date-range-inputs">
@@ -51,7 +51,7 @@
 									</label>
 								</div>
 							</div>
-							
+
 							<div class="trip-item">
 								<strong>Departure</strong>
 								<div class="date-range-inputs">
@@ -433,61 +433,61 @@
 		});
 
 		document.addEventListener('DOMContentLoaded', () => {
-		const surveyForm = document.querySelector('.submit-btn');
-		const cardContainer = document.querySelector('.card-container');
-		const loadingSpinner = document.getElementById('loading-spinner');
+			const surveyForm = document.querySelector('.submit-btn');
+			const cardContainer = document.querySelector('.card-container');
+			const loadingSpinner = document.getElementById('loading-spinner');
 
-		surveyForm?.addEventListener('click', async () => {
-			// Show loading spinner
-			loadingSpinner.classList.remove('hidden');
+			surveyForm?.addEventListener('click', async () => {
+				// Show loading spinner
+				loadingSpinner.classList.remove('hidden');
 
-			// Gather inputs
-			const destinationInput = document.getElementById('step-destination') || document.getElementById('summary-location');
-			const destination = destinationInput?.value.trim() || "";
+				// Gather inputs
+				const destinationInput = document.getElementById('step-destination') || document.getElementById('summary-location');
+				const destination = destinationInput?.value.trim() || "";
 
-			const startDate = document.getElementById('start-date')?.value || null;
-			const endDate = document.getElementById('end-date')?.value || null;
-			const startTime = document.getElementById('start-time')?.value || null;
-			const endTime = document.getElementById('end-time')?.value || null;
-			const notes = document.getElementById('user-notes')?.value || "";
+				const startDate = document.getElementById('start-date')?.value || null;
+				const endDate = document.getElementById('end-date')?.value || null;
+				const startTime = document.getElementById('start-time')?.value || null;
+				const endTime = document.getElementById('end-time')?.value || null;
+				const notes = document.getElementById('user-notes')?.value || "";
 
-			const environment = document.querySelector('.choice-btn[data-env].active')?.dataset.env || "Any";
-			const budget = document.querySelector('.choice-btn[data-budget].active')?.dataset.budget || "Any";
-			const vibe = document.querySelector('.choice-btn[data-choice].active')?.dataset.choice || "Any";
-			const diet = document.querySelector('.choice-btn[data-diet].active')?.dataset.diet || "None";
+				const environment = document.querySelector('.choice-btn[data-env].active')?.dataset.env || "Any";
+				const budget = document.querySelector('.choice-btn[data-budget].active')?.dataset.budget || "Any";
+				const vibe = document.querySelector('.choice-btn[data-choice].active')?.dataset.choice || "Any";
+				const diet = document.querySelector('.choice-btn[data-diet].active')?.dataset.diet || "None";
 
-			const tags = [...selectedTags.querySelectorAll('.tag')].map(tag => tag.dataset.tag);
+				const tags = [...selectedTags.querySelectorAll('.tag')].map(tag => tag.dataset.tag);
 
-			const surveyData = {
-				destination,
-				startDate,
-				endDate,
-				startTime,
-				endTime,
-				environment,
-				budget,
-				vibe,
-				diet,
-				notes,
-				tags
-			};
+				const surveyData = {
+					destination,
+					startDate,
+					endDate,
+					startTime,
+					endTime,
+					environment,
+					budget,
+					vibe,
+					diet,
+					notes,
+					tags
+				};
 
-			try {
-				const response = await fetch("/submit_survey", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(surveyData)
-				});
+				try {
+					const response = await fetch("/submit_survey", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify(surveyData)
+					});
 
-				const data = await response.json();
-				console.log("Received cards:", data.cards);
+					const data = await response.json();
+					console.log("Received cards:", data.cards);
 
-				cardContainer.innerHTML = "";
+					cardContainer.innerHTML = "";
 
-				data.cards.forEach(item => {
-					const cardEl = document.createElement("div");
-					cardEl.className = "card";
-					cardEl.innerHTML = `
+					data.cards.forEach(item => {
+						const cardEl = document.createElement("div");
+						cardEl.className = "card";
+						cardEl.innerHTML = `
 						<img src="${item.image}" alt="Image of ${item.location}" class="card-image" />
 						<div class="card-content">
 							<div class="card-top">
@@ -506,16 +506,33 @@
 							<p class="description">${item.description}</p>
 						</div>
 					`;
-					cardContainer.appendChild(cardEl);
-				});
-			} catch (err) {
-				console.error("Error fetching cards:", err);
-			} finally {
-				// Always hide spinner regardless of success or error
-				loadingSpinner.classList.add('hidden');
-			}
+						cardContainer.appendChild(cardEl);
+					});
+				} catch (err) {
+					console.error("Error fetching cards:", err);
+				} finally {
+					// Always hide spinner regardless of success or error
+					loadingSpinner.classList.add('hidden');
+				}
+			});
 		});
-	});
+	</script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const guestBtn = document.getElementById('guest-btn');
+			const loginPopup = document.getElementById('login-popup');
+
+			guestBtn?.addEventListener('click', () => {
+				// Hide the login popup
+				if (loginPopup) {
+					loginPopup.style.display = 'none';
+
+					// Optionally: remember guest status to avoid showing it again
+					localStorage.setItem('loggedIn', 'guest');
+				}
+			});
+		});
 	</script>
 
 	<!-- BEGIN PLERDY CODE -->
