@@ -362,3 +362,7 @@ def get_itinerary_from_database():
         })
 
     return jsonify({'events': itinerary}), 200
+
+@views_blueprint.route('/old-survey')
+def old_survey_page():
+    return render_template('old-survey.html', cards=[], mapbox_key=mapbox_api_key)
