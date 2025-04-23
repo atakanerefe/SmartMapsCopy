@@ -24,19 +24,46 @@
 
 					<!-- Trip Summary -->
 					<div class="trip-summary">
-						<h2>Plan Your Trip!</h2>
+						<div class="trip-header-row">
+							<h2 class="trip-title">Plan Your Trip!</h2>
+							<button class="submit-btn">Generate</button>
+						</div>
 						<div class="trip-summary-grid">
 							<div class="trip-item">
-								<strong>📍 Location</strong>
-								<span id="summary-location">City, State, Country</span>
+								<strong>Where are you traveling?</strong>
+								<div class="autocomplete-container">
+									<input type="text" id="step-destination" placeholder="Enter a city..."
+										autocomplete="off" />
+									<ul id="suggestions" class="autocomplete-list"></ul>
+								</div>
 							</div>
+							
 							<div class="trip-item">
-								<strong>📅 Date</strong>
-								<span id="summary-date">March 18, 2025</span>
+								<strong>Arrival</strong>
+								<div class="date-range-inputs">
+									<label>
+										Date:
+										<input type="date" id="start-date">
+									</label>
+									<label>
+										Time:
+										<input type="time" id="start-time">
+									</label>
+								</div>
 							</div>
+							
 							<div class="trip-item">
-								<strong>🕒 Travel Window</strong>
-								<span id="summary-time">10:00 AM – 8:00 PM</span>
+								<strong>Departure</strong>
+								<div class="date-range-inputs">
+									<label>
+										Date:
+										<input type="date" id="end-date">
+									</label>
+									<label>
+										Time:
+										<input type="time" id="end-time">
+									</label>
+								</div>
 							</div>
 						</div>
 
@@ -122,7 +149,21 @@
 	</div>
 	</section>
 
-	<div id="survey-modal" class="modal-overlay">
+	{% if not current_user.is_authenticated %}
+	<div id="login-popup" class="modal-overlay">
+		<div class="modal-content login-modal">
+			<h2>Welcome to SmartMaps!</h2>
+			<p>Sign in to save your trips and preferences, or continue as a guest to start planning right away.</p>
+
+			<div class="login-options">
+				<a href="{{ url_for('auth.google_login') }}" class="btn primary">Sign in with Google</a>
+				<button id="guest-btn" class="btn outline">Continue as Guest</button>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
+	<!-- <div id="survey-modal" class="modal-overlay">
 		<div class="modal-content" id="survey-content">
 			<button class="close-modal" aria-label="Close survey">&times;</button>
 
@@ -130,7 +171,10 @@
 				<h2>Welcome to SmartMaps!</h2>
 				<h3>We're first going to ask some questions, so we can tailor your next trip to be perfect!</h3>
 
-				<div class="survey-nav single">
+				<div class="survey-nav">
+					<div class="login-prompt">
+						<p>Already have an account? <a href="{{ url_for('auth.google_login') }}">Sign in</a></p>
+					</div>
 					<button class="next-btn">→</button>
 				</div>
 			</div>
@@ -262,7 +306,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</div> -->
 
 	<!-- Scripts -->
 	<script src="static/js/jquery.min.js"></script>
@@ -272,7 +316,7 @@
 	<script src="static/js/util.js"></script>
 	<script src="static/js/main.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-	<script src="static/js/survey.js"></script>
+	<!-- <script src="static/js/survey.js"></script> -->
 
 	<script>
 		document.addEventListener('DOMContentLoaded', () => {
@@ -388,64 +432,86 @@
 		});
 
 		document.addEventListener('DOMContentLoaded', () => {
-			const surveyForm = document.querySelector('.submit-btn');
-			const cardContainer = document.querySelector('.card-container');
+		const surveyForm = document.querySelector('.submit-btn');
+		const cardContainer = document.querySelector('.card-container');
+		const loadingSpinner = document.getElementById('loading-spinner');
 
-			surveyForm?.addEventListener('click', async () => {
-				// Grab survey responses here however you're collecting them
-				const surveyData = {
-					destination: document.getElementById('step-destination').value,
-					environment: document.querySelector('.choice-btn[data-env].active')?.dataset.env || "Any",
-					budget: document.querySelector('.choice-btn[data-budget].active')?.dataset.budget || "Any",
-					vibe: document.querySelector('.choice-btn[data-choice].active')?.dataset.choice || "Any",
-					diet: document.querySelector('.choice-btn[data-diet].active')?.dataset.diet || "None",
-					notes: document.getElementById('user-notes')?.value || ""
-				};
+		surveyForm?.addEventListener('click', async () => {
+			// Show loading spinner
+			loadingSpinner.classList.remove('hidden');
 
-				try {
-					const response = await fetch("/submit_survey", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify(surveyData)
-					});
+			// Gather inputs
+			const destinationInput = document.getElementById('step-destination') || document.getElementById('summary-location');
+			const destination = destinationInput?.value.trim() || "";
 
-					const data = await response.json();
-					console.log("Received cards:", data.cards);
+			const startDate = document.getElementById('start-date')?.value || null;
+			const endDate = document.getElementById('end-date')?.value || null;
+			const startTime = document.getElementById('start-time')?.value || null;
+			const endTime = document.getElementById('end-time')?.value || null;
+			const notes = document.getElementById('user-notes')?.value || "";
 
-					cardContainer.innerHTML = "";
+			const environment = document.querySelector('.choice-btn[data-env].active')?.dataset.env || "Any";
+			const budget = document.querySelector('.choice-btn[data-budget].active')?.dataset.budget || "Any";
+			const vibe = document.querySelector('.choice-btn[data-choice].active')?.dataset.choice || "Any";
+			const diet = document.querySelector('.choice-btn[data-diet].active')?.dataset.diet || "None";
 
-					data.cards.forEach(item => {
-						const cardEl = document.createElement("div");
-						cardEl.className = "card";
-						cardEl.innerHTML = `
-							<img src="${item.image}" alt="Image of ${item.location}" class="card-image" />
-							<div class="card-content">
-								<div class="card-top">
+			const surveyData = {
+				destination,
+				startDate,
+				endDate,
+				startTime,
+				endTime,
+				environment,
+				budget,
+				vibe,
+				diet,
+				notes
+			};
+
+			try {
+				const response = await fetch("/submit_survey", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(surveyData)
+				});
+
+				const data = await response.json();
+				console.log("Received cards:", data.cards);
+
+				cardContainer.innerHTML = "";
+
+				data.cards.forEach(item => {
+					const cardEl = document.createElement("div");
+					cardEl.className = "card";
+					cardEl.innerHTML = `
+						<img src="${item.image}" alt="Image of ${item.location}" class="card-image" />
+						<div class="card-content">
+							<div class="card-top">
 								<h2 class="location">${item.location}</h2>
 								<label class="select-wrapper">
 									<input type="checkbox" name="select_${item.location}">
 									<span class="select-label">Select</span>
 								</label>
-								</div>
-								<div class="rating">
-								${"⭐".repeat(item.stars || 0)}
-								</div>
-								<div class="tags">
-								${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
-								</div>
-								<p class="description">${item.description}</p>
 							</div>
-							`;
-						cardContainer.appendChild(cardEl);
-					});
-
-				} catch (err) {
-					console.error("Failed to submit survey:", err);
-				}
-			});
+							<div class="rating">
+								${"⭐".repeat(item.stars || 0)}
+							</div>
+							<div class="tags">
+								${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
+							</div>
+							<p class="description">${item.description}</p>
+						</div>
+					`;
+					cardContainer.appendChild(cardEl);
+				});
+			} catch (err) {
+				console.error("Error fetching cards:", err);
+			} finally {
+				// Always hide spinner regardless of success or error
+				loadingSpinner.classList.add('hidden');
+			}
 		});
+	});
 	</script>
 
 	<!-- BEGIN PLERDY CODE -->
