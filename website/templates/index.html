@@ -130,7 +130,6 @@
 							<button class="bubble" data-tag="Wellness">Wellness</button>
 
 							<!-- Social & Mood -->
-							<button class="bubble" data-tag="Romantic">Romantic</button>
 							<button class="bubble" data-tag="Family-Friendly">Family-Friendly</button>
 							<button class="bubble" data-tag="Solo Traveler">Solo Traveler</button>
 
@@ -319,9 +318,11 @@
 	<!-- <script src="static/js/survey.js"></script> -->
 
 	<script>
+		let selectedTags;
+
 		document.addEventListener('DOMContentLoaded', () => {
 			// --- Handle Recommendation Bubble Tags ---
-			const selectedTags = document.getElementById('selected-tags');
+			selectedTags = document.getElementById('selected-tags');
 			const bubbleGrid = document.getElementById('bubble-grid');
 
 			const addTagToSelected = (tagText, bubble) => {
@@ -455,6 +456,8 @@
 			const vibe = document.querySelector('.choice-btn[data-choice].active')?.dataset.choice || "Any";
 			const diet = document.querySelector('.choice-btn[data-diet].active')?.dataset.diet || "None";
 
+			const tags = [...selectedTags.querySelectorAll('.tag')].map(tag => tag.dataset.tag);
+
 			const surveyData = {
 				destination,
 				startDate,
@@ -465,7 +468,8 @@
 				budget,
 				vibe,
 				diet,
-				notes
+				notes,
+				tags
 			};
 
 			try {

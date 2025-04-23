@@ -286,13 +286,17 @@ def generate_cards_from_responses(data):
     vibe = data.get("vibe", "any vibe")
     diet = data.get("diet", "no dietary restrictions")
     notes = data.get("notes", "")
+    tags = data.get("tags", [])
+
+    tag_str = ", ".join(tags) if tags else "no additional preferences"
 
     prompt = (
         f"I'm planning a trip to {destination}. I prefer {environment.lower()} activities,"
         f" my budget is {budget}, and I enjoy places that feel {vibe.lower()}."
         f" I have the following dietary restrictions: {diet}."
-        f" {notes if notes else ''}"
-        " Based on that, suggest 3 travel spots or experiences that match my preferences."
+        f" Additional preferences: {tag_str}."
+        f" {notes if notes else ''} "
+        "Based on that, suggest 3 travel spots or experiences that match my preferences."
         " Return them as JSON with:"
         " - location"
         " - stars (1–5)"
@@ -320,35 +324,27 @@ def generate_cards_from_responses(data):
                 card["image"] = image_url or "/static/img/no-image-available.png"
             return cards
 
-        # Ensure return even in unexpected structure
         print("Error parsing Gemini response structure")
-        return {
-            "cards": [{
-                "location": "Error generating cards",
-                "stars": 3,
-                "tags": ["fallback"],
-                "description": (
-                    "We couldn't generate recommendations right now. "
-                    "Please try again later."
-                ),
-                "image": "/static/default-image.jpg",
-            }]
-        }
+        return fallback_card()
 
     except (json.JSONDecodeError, TypeError, KeyError) as e:
         print("Error parsing Gemini response:", e)
-        return {
-            "cards": [{
-                "location": "Error generating cards",
-                "stars": 3,
-                "tags": ["fallback"],
-                "description": (
-                    "We couldn't generate recommendations right now. "
-                    "Please try again later."
-                ),
-                "image": "/static/default-image.jpg",
-            }]
-        }
+        return fallback_card()
+
+
+def fallback_card():
+    return {
+        "cards": [{
+            "location": "Error generating cards",
+            "stars": 3,
+            "tags": ["fallback"],
+            "description": (
+                "We couldn't generate recommendations right now. "
+                "Please try again later."
+            ),
+            "image": "/static/default-image.jpg",
+        }]
+    }
 
 
 @views_blueprint.route("/submit_survey", methods=["POST"])
