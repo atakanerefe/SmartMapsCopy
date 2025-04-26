@@ -24,6 +24,7 @@ views_blueprint = Blueprint("views", __name__)
 weather_api_key = os.environ.get('WEATHER_KEY')
 mapbox_api_key = os.environ.get('MAPBOX_KEY')
 
+admin_emails = ['obraym25@colby.edu']
 
 @views_blueprint.route('/', methods=['GET', 'POST'])
 def main_page():
@@ -233,6 +234,16 @@ def itinerary_page():
     Requires user to be logged in.
     """
     return render_template('schedule.html')
+
+@views_blueprint.route('/analytics')
+@login_required
+def analytics_page():
+    """
+    Renders the analytics page for the user's itinerary.
+    Requires user to be logged in.
+    """
+    # if current_user
+    return render_template('analytics.html')
 
 
 @views_blueprint.route('/planning')
