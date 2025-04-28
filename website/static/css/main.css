@@ -3137,28 +3137,36 @@ ul.actions.special {
 
 .card {
 	display: flex;
-	flex-direction: row; /* Image on the left, content on the right */
+	flex-direction: row;
 	align-items: flex-start;
 	gap: 1rem;
-	padding: 1rem;
-	background-color: #fff;
-	border: 1px solid #ddd;
-	border-radius: 12px;
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	padding: 1.2rem;
+	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.25);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 	width: 100%;
 	box-sizing: border-box;
+	margin-bottom: 1.5rem;
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+	transform: translateY(-6px);
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
 }
 
 .card-image {
-	width: 300px;
-	height: 300px;
+	width: 280px;
+	height: 280px;
 	object-fit: cover;
 	object-position: center;
-	border-radius: 12px;
+	border-radius: 14px;
 	flex-shrink: 0;
-  }
+}
 
-/* Content on the right */
 .card-content {
 	display: flex;
 	flex-direction: column;
@@ -3166,23 +3174,23 @@ ul.actions.special {
 	flex: 1;
 }
 
-/* Top row layout: title and checkbox */
 .card-top {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 0.5rem;
+	margin-bottom: 0.75rem;
 }
 
 .card h2.location {
-	font-size: 1.2rem;
+	font-size: 1.25rem;
 	margin: 0;
+	color: #222;
 }
 
 .select-wrapper {
 	display: flex;
 	align-items: center;
-	gap: 0.3rem;
+	gap: 0.4rem;
 	cursor: pointer;
 }
 
@@ -3198,7 +3206,20 @@ ul.actions.special {
 	font-weight: bold;
 }
 
-/* Other card styling */
+/* Unified Tag Style */
+.card .tag {
+	background: rgba(255, 255, 255, 0.4);
+	backdrop-filter: blur(4px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	padding: 0.3rem 0.7rem;
+	border-radius: 999px;
+	margin-right: 0.4rem;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: #333;
+	transition: background 0.2s ease;
+}
+
 .card .rating {
 	color: gold;
 	margin-bottom: 0.5rem;
@@ -3206,15 +3227,8 @@ ul.actions.special {
 
 .card .tags {
 	margin-bottom: 0.5rem;
-}
-
-.card .tag {
-	background-color: #eee;
-	padding: 0.2rem 0.5rem;
-	border-radius: 8px;
-	margin-right: 0.3rem;
-	font-size: 0.8rem;
-	display: inline-block;
+	display: flex;
+	flex-wrap: wrap;
 }
 
 .card .description {
@@ -3223,13 +3237,18 @@ ul.actions.special {
 }
 
 .trip-summary {
-	width: 75%;
-	background: #f9f9f9;
-	border: 1px solid #ddd;
+	flex: 1 1 70%;
+	min-width: 300px;
+
+	/* Glassmorphism styles */
+	background: rgba(255, 255, 255, 0.2);
 	border-radius: 12px;
 	padding: 1.5rem;
 	margin: 0 0 2rem 0;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .trip-summary h2 {
@@ -3280,11 +3299,12 @@ ul.actions.special {
 }
 
 .trip-item {
-	background: white;
-	border: 1px solid #e0e0e0;
+	background: rgba(255, 255, 255, 0.4);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(8px);
 	border-radius: 10px;
 	padding: 1rem;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .trip-item strong {
@@ -3336,10 +3356,13 @@ ul.actions.special {
 
 .refine-search {
 	width: 25%;
-	background-color: #f7f7f7;
-	padding: 1rem;
+	background: rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	border-radius: 12px;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+	padding: 1rem;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .refine-search h3 {
@@ -3354,24 +3377,39 @@ ul.actions.special {
 	gap: 0.5rem;
 }
 
+/* Base bubble style */
 .bubble {
 	all: unset;
-	/* resets all inherited button styles */
-	background-color: #e0e0e0;
-	padding: 0.25rem 0.75rem;
+	padding: 0.4rem 1rem;
 	border-radius: 999px;
-	font-size: 0.75rem;
+	font-size: 0.8rem;
+	font-weight: 500;
 	cursor: pointer;
 	display: inline-block;
 	white-space: nowrap;
-	transition: background-color 0.2s ease, color 0.2s ease;
 	text-align: center;
+
+	/* New styling */
+	background: rgba(255, 255, 255, 0.25);
+	color: #333;
+	backdrop-filter: blur(6px);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+	border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-.bubble:hover,
+/* On hover */
+.bubble:hover {
+	background: linear-gradient(90deg, #ff9a8b, #fad0c4);
+	color: #000;
+	transform: scale(1.05);
+}
+
+/* Active/selected state */
 .bubble.active {
-	background-color: #d06050;
+	background: linear-gradient(90deg, #f67280, #ffb88c);
 	color: white;
+	font-weight: 600;
 }
 
 .selected-tags {
@@ -3382,21 +3420,40 @@ ul.actions.special {
 	gap: 0.5rem;
 }
 
+/* Tag appearance */
 .selected-tags .tag {
-	background-color: #ccc;
-	padding: 0.4rem 0.8rem;
+	background: rgba(255, 255, 255, 0.25);
+	color: #333;
+	backdrop-filter: blur(6px);
 	border-radius: 999px;
+	padding: 0.4rem 0.8rem;
 	font-size: 0.85rem;
 	display: inline-flex;
 	align-items: center;
+	transition: background 0.25s ease, transform 0.2s ease;
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* Hover effect for entire tag */
+.selected-tags .tag:hover {
+	background: linear-gradient(90deg, #fbc2eb, #a6c1ee);
+	transform: scale(1.05);
+	color: #000;
+}
+
+/* Remove button (×) */
 .selected-tags .tag .remove {
 	margin-left: 6px;
 	font-weight: bold;
 	cursor: pointer;
+	color: #555;
+	transition: color 0.2s ease;
 }
 
+.selected-tags .tag .remove:hover {
+	color: #c0392b;
+}
 #planner-ui .container {
 	max-width: none;
 	width: 100%;
@@ -3413,13 +3470,21 @@ ul.actions.special {
 
 .custom-tag-input input {
 	flex-grow: 1;
-	/* ← allows input to take remaining space */
 	padding: 0.4rem 0.8rem;
 	font-size: 0.85rem;
 	border-radius: 999px;
-	border: 1px solid #ccc;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	background: rgba(255, 255, 255, 0.7);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
 	outline: none;
-	box-sizing: border-box;
+	color: #333;
+	transition: background 0.3s ease, border 0.3s ease;
+}
+
+.custom-tag-input input:focus {
+	background: rgba(255, 255, 255, 0.5);
+	border-color: rgba(255, 255, 255, 0.6);
 }
 
 .custom-tag-input button {
@@ -3432,24 +3497,33 @@ ul.actions.special {
 	margin: 0;
 	border: none;
 	border-radius: 50%;
-	background-color: #d06050;
+
+	/* Glassy color */
+	background: rgba(208, 96, 80, 0.85);
 	color: white;
+
+	/* Center text + icon */
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	cursor: pointer;
-	transition: background-color 0.2s ease;
 
-	/* RESET template styles */
-	min-width: auto;
-	text-transform: none;
-	letter-spacing: normal;
-	font-weight: normal;
-	box-shadow: none;
+	cursor: pointer;
+	transition: background-color 0.2s ease, transform 0.2s ease;
+
+	/* Subtle lift */
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+	/* TEMPLATE RESET OVERRIDES */
+	min-width: auto !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	font-weight: normal !important;
+	box-shadow: none !important;
 }
 
 .custom-tag-input button:hover {
-	background-color: #b84d3f;
+	background-color: rgba(184, 77, 63, 0.9);
+	transform: scale(1.05);
 }
 
 .modal-overlay {
@@ -3582,31 +3656,40 @@ ul.actions.special {
 	color: black;
 }
 
-/* Survey-specific buttons */
+/* Base styles for all planner/survey buttons */
 .next-btn,
 .submit-btn,
 .choice-btn {
 	all: unset;
 	display: inline-block;
-	padding: 0.6rem 1.2rem;
-	border-radius: 6px;
-	background-color: #444;
-	color: #fff;
+	padding: 0.6rem 1.5rem;
+	border-radius: 8px;
+	background: linear-gradient(90deg, #FF6B6B, #FFD93D);
+	color: white;
 	font-size: 1rem;
-	font-weight: 500;
+	font-weight: 600;
 	cursor: pointer;
 	text-align: center;
-	transition: background-color 0.2s ease;
-	box-sizing: border-box; /* Ensures padding doesn't break width */
-	border: none;
+	box-sizing: border-box;
 	user-select: none;
+	transition: transform 0.2s ease, box-shadow 0.3s ease;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* Optional hover effect */
+/* Hover: slight scale and glow */
 .next-btn:hover,
 .submit-btn:hover,
 .choice-btn:hover {
-	background-color: #000;
+	transform: scale(1.05);
+	box-shadow: 0 3px 8px rgba(255, 107, 107, 0.4);
+}
+
+/* Optional: active press state */
+.next-btn:active,
+.submit-btn:active,
+.choice-btn:active {
+	transform: scale(0.97);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .autocomplete-container {
