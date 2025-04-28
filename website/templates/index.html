@@ -10,13 +10,15 @@
 
 {% include 'header.html' %}
 
-<body class="right-sidebar is-preload">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/planning.css') }}">
+
+<body class="index-no-header right-sidebar is-preload">
 	<div id="page-wrapper">
 
 		{% include 'navbar.html' %}
 		<!-- Custom Planner UI Section -->
 		<section id="main" class="wrapper style2">
-			<div class="title">Planner</div>
+			<!-- <div class="title">Planner</div> -->
 			<div class="container">
 
 				<!-- Trip Summary -->
