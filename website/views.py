@@ -479,6 +479,26 @@ def get_draggables_from_database():
 
     return draggable_list
 
+@views_blueprint.route("/remove_draggable", methods=["POST"])
+@login_required
+def remove_draggable():
+    """
+    Removes a draggable event from the database.
+    """
+    print("Removing draggable...")
+    data = request.get_json()
+    item = data.get("title").strip()
+    if not item:
+        return jsonify({"error": "No item provided"}), 400
+    print("Item received:", item)
+    draggable = DragAndDropEvent.query.filter_by(title=item, user_id=current_user.id).first()
+    print("Draggable found:", draggable)
+    if draggable:
+        db.session.delete(draggable)
+        db.session.commit()
+        return jsonify({"message": "Draggable removed successfully!"}), 200
+    else:
+        return jsonify({"error": "Draggable not found"}), 404
 
 @views_blueprint.route("/get_itinerary", methods=["GET"])
 # add version to return empty when not logged in

@@ -74,11 +74,24 @@
           editable: true,
           droppable: true, // this allows things to be dropped onto the calendar
           drop: function(info) {
-            // is the "remove after drop" checkbox checked?
-            if (checkbox.checked) {
-              // if so, remove the element from the "Draggable Events" list
-              info.draggedEl.parentNode.removeChild(info.draggedEl);
-            }
+            info.draggedEl.parentNode.removeChild(info.draggedEl);
+            // remove the element from datbase
+            fetch('/remove_draggable', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                title: info.draggedEl.innerText
+              })
+            })
+            .then(response => {
+              if (response.ok) {
+                console.log('Event removed successfully');
+              } else {
+                console.error('Error removing event');
+              }
+            })
           },
           eventReceive: function(info) {
             saveCalendarData([info.event]);
@@ -146,7 +159,7 @@
           </style>
           <div id='external-events'>
             <p>
-              <strong>Draggable Events</strong>
+              <strong>Activities</strong>
             </p>
 
             {% for draggable in draggables %}
@@ -154,10 +167,6 @@
                 <div class='fc-event-main'>{{ draggable }}</div>
               </div>
             {% endfor %}
-            <p>
-              <input type='checkbox' id='drop-remove' />
-              <label for='drop-remove'>remove after drop</label>
-            </p>
           </div>
           
           <div id='calendar-container'>
