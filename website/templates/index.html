@@ -71,45 +71,6 @@
 
 						<!-- Selected Tags -->
 						<div class="selected-tags" id="selected-tags"></div>
-
-						<div id="loading-spinner" class="loading-spinner hidden">
-							<div class="spinner"></div>
-							<p>Loading recommendations...</p>
-						</div>
-
-						<div class="card-container">
-							{% for item in cards %}
-							<p>Cards count: {{ cards | length }}</p>
-
-							<div class="card">
-								<img src="{{ item.image }}" alt="Image of {{ item.location }}" class="card-image" />
-
-								<p style="font-size: 12px; color: gray;">Image URL: {{ item.image }}</p>
-
-								<div class="card-content">
-									<div class="card-top">
-										<h2 class="location">{{ item.location }}</h2>
-										<label class="select-wrapper">
-											<input type="checkbox" name="select_{{ loop.index }}">
-											<span class="select-label">Select</span>
-										</label>
-									</div>
-
-									<div class="rating">
-										{% for _ in range(item.stars) %}⭐{% endfor %}
-									</div>
-
-									<div class="tags">
-										{% for tag in item.tags %}
-										<span class="tag">{{ tag }}</span>
-										{% endfor %}
-									</div>
-
-									<p class="description">{{ item.description }}</p>
-								</div>
-							</div>
-							{% endfor %}
-						</div>
 					</div>
 
 					<!-- Refine Your Search Sidebar -->
@@ -146,9 +107,60 @@
 			</div>
 
 			<!-- Card List -->
+			<div class="card-list" id="card-list">
+				<div class="placeholder-message" id="placeholder-message">
+					<h3>✨ Personalized Travel Recommendations</h3>
+					Input your travel details above and select tags to refine the search. Once ready, click
+					<strong>Generate</strong> to get personalized recommendations below!
+				</div>
 
+				<div id="loading-spinner" class="loading-spinner hidden">
+					<div class="spinner"></div>
+					Loading recommendations...
+				</div>
+
+				<div class="card-container">
+					{% for item in cards %}
+					<p>Cards count: {{ cards | length }}</p>
+
+					<div class="card">
+						<img src="{{ item.image }}" alt="Image of {{ item.location }}" class="card-image" />
+
+						<p style="font-size: 12px; color: gray;">Image URL: {{ item.image }}</p>
+
+						<div class="card-content">
+							<div class="card-top">
+								<h2 class="location">{{ item.location }}</h2>
+								<label class="select-wrapper">
+									<input type="checkbox" name="select_{{ loop.index }}">
+									<span class="select-label">Select</span>
+								</label>
+							</div>
+
+							<div class="rating">
+								{% for _ in range(item.stars) %}⭐{% endfor %}
+							</div>
+
+							<div class="tags">
+								{% for tag in item.tags %}
+								<span class="tag">{{ tag }}</span>
+								{% endfor %}
+							</div>
+
+							<p class="description">{{ item.description }}</p>
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+
+				<div class="pagination-controls">
+					<button id="prev-btn">← Prev</button>
+					<button id="next-btn">Next →</button>
+				</div>
+			</div>
+		</section>
 	</div>
-	</section>
+
 
 	{% if not current_user.is_authenticated %}
 	<div id="login-popup" class="modal-overlay">
@@ -163,151 +175,6 @@
 		</div>
 	</div>
 	{% endif %}
-
-	<!-- <div id="survey-modal" class="modal-overlay">
-		<div class="modal-content" id="survey-content">
-			<button class="close-modal" aria-label="Close survey">&times;</button>
-
-			<div class="survey-step active" data-step="1">
-				<h2>Welcome to SmartMaps!</h2>
-				<h3>We're first going to ask some questions, so we can tailor your next trip to be perfect!</h3>
-
-				<div class="survey-nav">
-					<div class="login-prompt">
-						<p>Already have an account? <a href="{{ url_for('auth.google_login') }}">Sign in</a></p>
-					</div>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="2">
-				<h2>Where are you traveling to?</h2>
-				<div class="autocomplete-container">
-					<input type="text" id="step-destination" placeholder="Enter a city..." autocomplete="off" />
-					<ul id="suggestions" class="autocomplete-list"></ul>
-				</div>
-
-				<div class="error-message" id="error-step-2"></div>
-
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="3">
-				<h2>When days are you traveling?</h2>
-				<div class="date-range-inputs">
-					<label>
-						Start Date:
-						<input type="date" id="start-date">
-					</label>
-					<label>
-						End Date:
-						<input type="date" id="end-date">
-					</label>
-				</div>
-
-				<div class="error-message" id="error-step-3"></div>
-
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="4">
-				<h2>Do you happen to know when you will arrive and depart?</h2>
-				<div class="date-range-inputs">
-					<label>
-						Start Time:
-						<input type="time" id="start-time">
-					</label>
-					<label>
-						End Time:
-						<input type="time" id="end-time">
-					</label>
-				</div>
-
-				<div class="error-message" id="error-step-4"></div>
-
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="5">
-				<h2>What type of activities are you looking to do?</h2>
-				<div class="environment-options">
-					<button class="choice-btn" data-env="Outdoor">Outdoor</button>
-					<button class="choice-btn" data-env="Indoor">Indoor</button>
-					<button class="choice-btn" data-env="Mixed">Mixed</button>
-				</div>
-
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="6">
-				<h2>What's your budget for this trip?</h2>
-				<div class="budget-options">
-					<button class="choice-btn" data-budget="$">$ (Budget-Friendly)</button>
-					<button class="choice-btn" data-budget="$$">$$ (Mid-Range)</button>
-					<button class="choice-btn" data-budget="$$$">$$$ (Luxury)</button>
-					<button class="choice-btn" data-budget="Not Sure">Not sure</button>
-				</div>
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="7">
-				<h2>What kind of experience are you looking for?</h2>
-				<div class="choice-options">
-					<button class="choice-btn" data-choice="Touristy">Touristy</button>
-					<button class="choice-btn" data-choice="Low-key">Secret Gems</button>
-					<button class="choice-btn" data-choice="Both">Both</button>
-				</div>
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="8">
-				<h2>Do you have any dietary restrictions?</h2>
-				<div class="choice-options">
-					<button class="choice-btn" data-diet="None">No Restrictions</button>
-					<button class="choice-btn" data-diet="Vegetarian">Vegetarian</button>
-					<button class="choice-btn" data-diet="Vegan">Vegan</button>
-					<button class="choice-btn" data-diet="Gluten-Free">Gluten-Free</button>
-					<button class="choice-btn" data-diet="Kosher">Kosher</button>
-					<button class="choice-btn" data-diet="Halal">Halal</button>
-					<button class="choice-btn" data-diet="Other">Other</button>
-				</div>
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="next-btn">→</button>
-				</div>
-			</div>
-
-			<div class="survey-step" data-step="9">
-				<h2>Last thing, is there anything else we should know?</h2>
-				<div class="notes-container">
-					<textarea id="user-notes"
-						placeholder="Share anything important, preferences, or special requests..."></textarea>
-				</div>
-				<div class="survey-nav">
-					<button class="prev-btn">←</button>
-					<button class="submit-btn">✔</button>
-				</div>
-			</div>
-		</div>
-	</div> -->
 
 	<!-- Scripts -->
 	<script src="static/js/jquery.min.js"></script>
@@ -438,6 +305,7 @@
 			const surveyForm = document.querySelector('.submit-btn');
 			const cardContainer = document.querySelector('.card-container');
 			const loadingSpinner = document.getElementById('loading-spinner');
+			const placeholderBox = document.querySelector(".card-list");
 
 			surveyForm?.addEventListener('click', async () => {
 				// Show loading spinner
@@ -484,36 +352,79 @@
 					const data = await response.json();
 					console.log("Received cards:", data.cards);
 
+					const placeholderText = document.getElementById('placeholder-message');
+					if (placeholderText) {
+						placeholderText.style.display = "none";
+					}
+
+					// Clear old cards
 					cardContainer.innerHTML = "";
 
-					data.cards.forEach(item => {
-						const cardEl = document.createElement("div");
-						cardEl.className = "card";
-						cardEl.innerHTML = `
-						<img src="${item.image}" alt="Image of ${item.location}" class="card-image" />
-						<div class="card-content">
-							<div class="card-top">
-								<h2 class="location">${item.location}</h2>
-								<label class="select-wrapper">
-									<input type="checkbox" name="select_${item.location}">
-									<span class="select-label">Select</span>
-								</label>
-							</div>
-							<div class="rating">
-								${"⭐".repeat(item.stars || 0)}
-							</div>
-							<div class="tags">
-								${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
-							</div>
-							<p class="description">${item.description}</p>
-						</div>
-					`;
-						cardContainer.appendChild(cardEl);
+					// Render cards
+					let allCards = data.cards;
+					let currentPage = 1;
+					const cardsPerPage = 5;
+
+					function renderPage(page) {
+						const cardContainer = document.querySelector(".card-container");
+						cardContainer.innerHTML = "";
+
+						const start = (page - 1) * cardsPerPage;
+						const end = start + cardsPerPage;
+						const cardsToRender = allCards.slice(start, end);
+
+						cardsToRender.forEach(item => {
+							const cardEl = document.createElement("div");
+							cardEl.className = "card";
+							cardEl.innerHTML = `
+								<img src="${item.image}" alt="Image of ${item.location}" class="card-image" />
+								<div class="card-content">
+									<div class="card-top">
+									<h2 class="location">${item.location}</h2>
+									<label class="select-wrapper">
+										<input type="checkbox" name="select_${item.location}">
+										<span class="select-label">Select</span>
+									</label>
+									</div>
+									<div class="rating">${"⭐".repeat(item.stars || 0)}</div>
+									<div class="tags">${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
+									<p class="description">${item.description}</p>
+								</div>
+								`;
+							cardContainer.appendChild(cardEl);
+						});
+
+						document.getElementById("prev-btn").style.display = page > 1 ? "inline-block" : "none";
+						document.getElementById("next-btn").style.display = end < allCards.length ? "inline-block" : "none";
+					}
+
+					document.getElementById("prev-btn").addEventListener("click", () => {
+						if (currentPage > 1) {
+							currentPage--;
+							renderPage(currentPage);
+						}
 					});
+
+					document.getElementById("next-btn").addEventListener("click", () => {
+						if (currentPage * cardsPerPage < allCards.length) {
+							currentPage++;
+							renderPage(currentPage);
+						}
+					});
+
+					// Initial render
+					renderPage(currentPage);
+
+					// Show pagination only if more than one page
+					const paginationControls = document.querySelector(".pagination-controls");
+					if (allCards.length > cardsPerPage) {
+						paginationControls.style.display = "flex";
+					} else {
+						paginationControls.style.display = "none";
+					}
 				} catch (err) {
 					console.error("Error fetching cards:", err);
 				} finally {
-					// Always hide spinner regardless of success or error
 					loadingSpinner.classList.add('hidden');
 				}
 			});
@@ -551,7 +462,7 @@
 
 	<!-- BEGIN PLERDY A/B TESTING CODE -->
 	<script type="text/javascript">
-		var _suid=60696;
+		var _suid = 60696;
 	</script>
 	<script async type="text/javascript" src="https://a.plerdy.com/public/js/click/plerdy_ab-min.js?v=b3ffe66"></script>
 	<!-- END PLERDY A/B TESTING CODE -->
