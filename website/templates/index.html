@@ -108,6 +108,11 @@
 
 			<!-- Card List -->
 			<div class="card-list" id="card-list">
+				<!-- Add "Add to Itenerary: {number of selected task}" button and move it to the far right-->
+				<div class="itinerary-btn-container" id="itinerary-selections" style="display: none;">
+					<button class="itinerary-btn">Add to Itinerary <span id="selected-list">{{ selected }}</span></button>
+				</div>
+
 				<div class="placeholder-message" id="placeholder-message">
 					<h3>✨ Personalized Travel Recommendations</h3>
 					Input your travel details above and select tags to refine the search. Once ready, click
@@ -382,7 +387,7 @@
 									<div class="card-top">
 									<h2 class="location">${item.location}</h2>
 									<label class="select-wrapper">
-										<input type="checkbox" name="select_${item.location}">
+										<input type="checkbox" name="${item.location}">
 										<span class="select-label">Select</span>
 									</label>
 									</div>
@@ -394,9 +399,59 @@
 							cardContainer.appendChild(cardEl);
 						});
 
+						const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+						checkboxes.forEach(checkbox => {
+							checkbox.addEventListener('click', () => {
+								const selectedList = document.getElementById('selected-list');
+								console.log("Selected List:", selectedList);
+								const selectionDiv = document.getElementById('itinerary-selections');
+								if (checkbox.checked) {
+										// Add the selected item to the list
+										const listItem = document.createElement('li');
+										listItem.textContent = checkbox.name;
+										listItem.dataset.name = checkbox.name;
+										listItem.style.textAlign = "left";
+										selectedList.appendChild(listItem);
+										// Show the itinerary-selections div if not already visible
+										if (selectionDiv.style.display === "none") {
+												selectionDiv.style.display = "flex";
+										}
+								} else {
+										// Remove the item from the list if unchecked
+										const listItem = selectedList.querySelector(`li[data-name="${checkbox.name}"]`);
+										if (listItem) {
+												selectedList.removeChild(listItem);
+										}
+										// Hide the button if there are no selected items left
+										if (selectedList.children.length === 0) {
+												selectionDiv.style.display = "none";
+												
+										}
+								}
+							});
+						});
+
 						document.getElementById("prev-btn").style.display = page > 1 ? "inline-block" : "none";
 						document.getElementById("next-btn").style.display = end < allCards.length ? "inline-block" : "none";
 					}
+
+					// if itinerary-btn clicked, call /save_itinerary with items as list
+					const itineraryBtn = document.querySelector('.itinerary-btn');
+					itineraryBtn?.addEventListener('click', () => {
+						const selectedItems = [...document.querySelectorAll('.card input[type="checkbox"]:checked')].map(checkbox => checkbox.name);
+						console.log("Selected items:", selectedItems);
+
+						fetch('/add_to_itinerary', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ items: selectedItems })
+						})
+						.then(response => response.json())
+						.then(data => {
+							console.log("Itinerary saved:", data);
+						})
+						.catch(error => console.error("Error saving itinerary:", error));
+					});
 
 					document.getElementById("prev-btn").addEventListener("click", () => {
 						if (currentPage > 1) {
