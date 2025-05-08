@@ -83,7 +83,6 @@ def get_itinerary():
         "Prioritize activities that are suitable for the weather conditions, prioritizing "
         "outdoor activities with nice weather and indoor ones in bad weather. "
         "Do not include a description of the weather at the beginning of the itinerary. "
-        "Start with: Here is an itinerary for your trip:"
     )
 
     # Call the AI function
@@ -288,7 +287,7 @@ def fetch_unsplash_image(query):
 
 def generate_cards_from_responses(data):
     """
-    Generates travel recommendation cards using the Gemini API 
+    Generates travel recommendation cards using the Gemini API, factoring in weather data if available,
     and enriches each with an Unsplash image.
 
     Args:
@@ -304,8 +303,25 @@ def generate_cards_from_responses(data):
     diet = data.get("diet", "no dietary restrictions")
     notes = data.get("notes", "")
     tags = data.get("tags", [])
+    start_date = data.get("startDate")  # optionally pass in date to fetch accurate weather
 
     tag_str = ", ".join(tags) if tags else "no additional preferences"
+
+    # Extract city, state, country from destination string
+    name_data = destination.split(',')
+    city = name_data[0].strip()
+
+    if len(name_data) == 2:
+        country = name_data[1].strip()
+        state = None
+    elif len(name_data) == 3:
+        state = name_data[1].strip()
+        country = name_data[2].strip()
+    else:
+        city, state, country = destination, None, ""
+
+    # Integrate weather prompt
+    weather_info = get_weather_details(city, country, state)
 
     prompt = (
         f"I'm planning a trip to {destination}. I prefer {environment.lower()} activities,"
