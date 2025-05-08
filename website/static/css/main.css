@@ -2187,12 +2187,12 @@ ul.actions.special {
 	padding: 0;
 	/*Edit1*/
 	position: relative;
-    background: url('../img/myImg1.png') center center / cover no-repeat;
-    height: 35em; /* Adjust height as needed */
+    background: url('../img/myImg1.webp') center center / cover no-repeat;
+    height: 35em;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white; /* Ensures text is visible */
+    color: white;
 }
 
 #header:before {
