@@ -276,6 +276,12 @@ def fetch_unsplash_image(query):
             return data["results"][0]["urls"]["regular"]
     except requests.RequestException as e:
         print(f"Unsplash request error for {query}: {e}")
+
+    # print("Status Code:", response.status_code)
+    # print("X-Ratelimit-Limit:", response.headers.get("X-Ratelimit-Limit"))
+    # print("X-Ratelimit-Remaining:", response.headers.get("X-Ratelimit-Remaining"))
+    # print("X-Ratelimit-Reset:", response.headers.get("X-Ratelimit-Reset"))
+
     return None
 
 
@@ -318,12 +324,18 @@ def generate_cards_from_responses(data):
     weather_info = get_weather_details(city, country, state)
 
     prompt = (
-        f"I'm planning a trip to {destination} on {start_date if start_date else 'a certain date'}. "
-        f"I prefer {environment.lower()} activities, my budget is {budget}, and I enjoy places that feel {vibe.lower()}. "
-        f"I have the following dietary restrictions: {diet}. Additional preferences: {tag_str}. {notes if notes else ''} "
-        f"Given the following weather: {weather_info}, suggest 5 travel spots or experiences that match my preferences.\n"
-        "Return them as JSON with: - location - stars (1–5) - tags (as an array) - a short description.\n"
-        "Do NOT wrap the output in markdown or ```"
+        f"I'm planning a trip to {destination}. I prefer {environment.lower()} activities,"
+        f" my budget is {budget}, and I enjoy places that feel {vibe.lower()}."
+        f" I have the following dietary restrictions: {diet}."
+        f" Additional preferences: {tag_str}."
+        f" {notes if notes else ''} "
+        "Based on that, suggest the top 1-15 travel spots or experiences that match my preferences. Only generate items that match my preferences exactly."
+        " Return them as JSON with:"
+        " - location"
+        " - stars (1–5)"
+        " - tags (as an array)"
+        " - a short description."
+        " Do NOT wrap the output in markdown or ```."
     )
 
     try:

@@ -2185,6 +2185,14 @@ ul.actions.special {
 	background: url("../img/banner.jpg") center center;
 	background-size: cover;
 	padding: 0;
+	/*Edit1*/
+	position: relative;
+    background: url('../img/myImg1.png') center center / cover no-repeat;
+    height: 35em; /* Adjust height as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Ensures text is visible */
 }
 
 #header:before {
@@ -2195,10 +2203,26 @@ ul.actions.special {
 	width: 100%;
 	height: 100%;
 	background: url("../img/overlay.png");
+	/*Edit1*/
+	content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Black overlay with 50% opacity */
+    z-index: 0;
+    pointer-events: none; /* Allow clicks to pass through */
 }
 
 .homepage #header {
 	height: 35em;
+}
+
+#header .container {
+    position: relative;
+    z-index: 2; /* Ensures content is above the overlay */
+    text-align: center;
 }
 
 /* Logo */
@@ -3995,3 +4019,44 @@ ul.actions.special {
 	margin: 0 !important;
 	padding: 0 !important;
 }
+
+.card-list {
+    max-width: 75%; /* match .trip-summary width */
+    margin: 2rem auto; /* centers it and gives vertical space */
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+    color: #333;
+}
+
+.card-list h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.pagination-controls {
+	display: none; /* hidden initially */
+	justify-content: center;
+	gap: 1rem;
+	margin-top: 1.5rem;
+}
+  
+  #prev-btn, #next-btn {
+	all: unset;
+	padding: 0.5rem 1rem;
+	background: #444;
+	color: white;
+	border-radius: 8px;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+  }
+  
+  #prev-btn:hover, #next-btn:hover {
+	background-color: #222;
+  }
