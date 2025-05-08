@@ -277,6 +277,12 @@ def fetch_unsplash_image(query):
             return data["results"][0]["urls"]["regular"]
     except requests.RequestException as e:
         print(f"Unsplash request error for {query}: {e}")
+
+    # print("Status Code:", response.status_code)
+    # print("X-Ratelimit-Limit:", response.headers.get("X-Ratelimit-Limit"))
+    # print("X-Ratelimit-Remaining:", response.headers.get("X-Ratelimit-Remaining"))
+    # print("X-Ratelimit-Reset:", response.headers.get("X-Ratelimit-Reset"))
+
     return None
 
 
@@ -307,7 +313,7 @@ def generate_cards_from_responses(data):
         f" I have the following dietary restrictions: {diet}."
         f" Additional preferences: {tag_str}."
         f" {notes if notes else ''} "
-        "Based on that, suggest 3 travel spots or experiences that match my preferences."
+        "Based on that, suggest the top 1-15 travel spots or experiences that match my preferences. Only generate items that match my preferences exactly."
         " Return them as JSON with:"
         " - location"
         " - stars (1–5)"
