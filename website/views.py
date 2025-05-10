@@ -17,7 +17,7 @@ import requests
 
 from website import db
 from website.gemini_api import make_gemini_request
-from .models import Event
+from .models import Event, DragAndDropEvent
 
 views_blueprint = Blueprint("views", __name__)
 
@@ -232,7 +232,8 @@ def itinerary_page():
     Renders the schedule view page for the user's itinerary.
     Requires user to be logged in.
     """
-    return render_template('schedule.html')
+    draggables = get_draggables_from_database()
+    return render_template('schedule.html', draggables=draggables)
 
 @views_blueprint.route('/analytics')
 @login_required
@@ -251,7 +252,7 @@ def planning_page():
     Renders the planning interface with recommendation cards.
     Requires user to be logged in.
     """
-    return render_template('index.html', cards=[], mapbox_key=mapbox_api_key)
+    return render_template('index.html', cards=[], selected='', mapbox_key=mapbox_api_key)
 
 
 def fetch_unsplash_image(query):
@@ -409,7 +410,7 @@ def submit_survey():
 
 
 @views_blueprint.route("/save_itinerary", methods=["POST"])
-# @login_required # add back with login prompt later
+@login_required # add back with login prompt later
 def save_itinerary_to_database():
     """
     Endpoint to save the itinerary.
@@ -445,6 +446,59 @@ def save_itinerary_to_database():
 
     return jsonify({"message": "Itinerary saved successfully!"}), 200
 
+@views_blueprint.route("/add_to_itinerary", methods=["POST"])
+@login_required
+def add_to_itinerary():
+    """
+    Saves event draggables from planning page to itinerary page.
+    """
+    print("Adding event to itinerary...")
+    data = request.get_json()
+    items = data.get("items", [])
+    if not items:
+        return jsonify({"error": "No items provided"}), 400
+    print("Items received:", items)
+
+    for item in items:
+        new_draggable = DragAndDropEvent(title=item, user_id=current_user.id)
+        db.session.add(new_draggable)
+    db.session.commit()
+    return jsonify({"message": "Items added to itinerary draggables successfully!"}), 200
+
+@login_required
+def get_draggables_from_database():
+    """
+    Fetches all draggable events from the database for the current user.
+    """
+    user_id = current_user.id
+    draggables = DragAndDropEvent.query.filter_by(user_id=user_id).all()
+
+    draggable_list = []
+    for draggable in draggables:
+        draggable_list.append(draggable.title)
+
+    return draggable_list
+
+@views_blueprint.route("/remove_draggable", methods=["POST"])
+@login_required
+def remove_draggable():
+    """
+    Removes a draggable event from the database.
+    """
+    print("Removing draggable...")
+    data = request.get_json()
+    item = data.get("title").strip()
+    if not item:
+        return jsonify({"error": "No item provided"}), 400
+    print("Item received:", item)
+    draggable = DragAndDropEvent.query.filter_by(title=item, user_id=current_user.id).first()
+    print("Draggable found:", draggable)
+    if draggable:
+        db.session.delete(draggable)
+        db.session.commit()
+        return jsonify({"message": "Draggable removed successfully!"}), 200
+    else:
+        return jsonify({"error": "Draggable not found"}), 404
 
 @views_blueprint.route("/get_itinerary", methods=["GET"])
 # add version to return empty when not logged in

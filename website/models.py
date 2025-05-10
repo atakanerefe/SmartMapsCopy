@@ -28,3 +28,9 @@ class Event(db.Model):
     end = db.Column(db.DateTime, nullable=True)
     all_day = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+class DragAndDropEvent(db.Model):
+    '''Drag and drop event class that contains information for drag and drop events.'''
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(80), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

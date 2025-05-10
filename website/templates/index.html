@@ -88,6 +88,11 @@
 
 			<!-- Card List -->
 			<div class="card-list" id="card-list">
+				<!-- Add "Add to Itenerary: {number of selected task}" button and move it to the far right-->
+				<div class="itinerary-btn-container" id="itinerary-selections" style="display: none;">
+					<button class="itinerary-btn">Add to Itinerary <span id="selected-list">{{ selected }}</span></button>
+				</div>
+
 				<div class="placeholder-message" id="placeholder-message">
 					Input your travel details above and select tags to refine the search. Once ready, click
 					<strong>Generate</strong> to get personalized recommendations here!
